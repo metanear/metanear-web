@@ -1,0 +1,40 @@
+{
+    "name": "near-open-web-frontend",
+    "version": "0.1.0",
+    "private": true,
+    "dependencies": {
+        "gh-pages": "^2.2.0",
+        "js-cookie": "^2.2.1",
+        "near-bindgen-as": "^1.2.0",
+        "near-runtime-ts": "^0.5.2",
+        "near-shell": "^0.20.1",
+        "nearlib": "^0.21.0",
+        "react": "^16.11.0",
+        "react-dom": "^16.11.0",
+        "react-scripts": "3.3.0"
+    },
+    "scripts": {
+        "start": "react-scripts start",
+        "build:frontend": "react-scripts build",
+        "test": "react-scripts test",
+        "eject": "react-scripts eject",
+        "deploy:pages": "gh-pages -d build",
+        "deploy": "npm run deploy:pages",
+        "build": "react-scripts build"
+    },
+    "eslintConfig": {
+        "extends": "react-app"
+    },
+    "browserslist": {
+        "production": [
+            ">0.2%",
+            "not dead",
+            "not op_mini all"
+        ],
+        "development": [
+            "last 1 chrome version",
+            "last 1 firefox version",
+            "last 1 safari version"
+        ]
+    }
+}
