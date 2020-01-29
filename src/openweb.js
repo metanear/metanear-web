@@ -110,7 +110,7 @@ export class OpenWebApp {
     return await this._contract.pull_message({}, GAS);
   }
 
-  async sendMessage(receiverId, appId, message) {
+  async sendMessage(receiverId, message, appId) {
     this.forceReady();
     receiverId = receiverId || this.accountId;
     appId = appId || this.appId;

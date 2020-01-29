@@ -35,6 +35,58 @@
   }
 }
 
+
+.profile-image {
+  height: 3em;
+  width: 3em;
+  border-radius: 50%;
+}
+
+.profile-name {
+  overflow: hidden;
+  margin-left: 0.5em;
+  vertical-align: middle;
+}
+
+.letter {
+  overflow: hidden;
+  height: 2em;
+  border-top: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
+  cursor: pointer;
+}
+
+.letter:hover {
+  background: #eee;
+}
+
+.letter-profile {
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.letter-profile-image {
+  height: 2em;
+  width: 2em;
+  border-radius: 50%;
+  vertical-align: middle;
+}
+
+.letter-profile-name {
+  overflow: hidden;
+  margin-left: 0.5em;
+  vertical-align: middle;
+}
+
+.letter-subject {
+  overflow: hidden;
+}
+
+.letter-content {
+  color: #999;
+  overflow: hidden;
+}
+
 .image-wrapper {
   display: flex;
   align-items: center;

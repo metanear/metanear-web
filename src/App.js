@@ -3,7 +3,10 @@ import nearlogo from './assets/gray_near_logo.svg';
 import './App.css';
 import * as nearlib from "nearlib";
 import {OpenWebApp} from './openweb.js';
-import {ProfileApp} from "./profile";
+import {ProfileApp} from "./ProfileApp";
+import {MailApp} from "./MailApp";
+import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
+import 'react-tabs/style/react-tabs.css';
 
 const GAS = 2_000_000_000_000_000;
 
@@ -89,7 +92,7 @@ class App extends Component {
     const apps = {
       profile: await this.initOpenWebApp('profile', accountId),
       graph: await this.initOpenWebApp('graph', accountId),
-      messages: await this.initOpenWebApp('messages', accountId),
+      mail: await this.initOpenWebApp('mail', accountId),
     };
     window.apps = apps;
     this.apps = apps;
@@ -98,13 +101,7 @@ class App extends Component {
     })
     console.log(apps);
   }
-/*
-  async fetchValues() {
-    await Promise.all([
-      this.profile.get('display_name'),
-    ])
-  }
-*/
+
   async initOpenWebApp(appId, accountId) {
     console.log("Initializing app: " + appId + " ...");
     const app = await new OpenWebApp(appId, accountId, window.nearConfig);
@@ -153,15 +150,29 @@ class App extends Component {
         <div className="image-wrapper">
           <img className="logo" src={nearlogo} alt="NEAR logo" />
         </div>
-        <h1>Hello, {this.state.accountId}</h1>
+        <h1>Hello{this.state.login ? ", " + this.state.accountId : "?"}</h1>
         <div>
           {this.state.login ? <button onClick={this.requestSignOut}>Log out</button>
             : <button onClick={this.requestSignIn}>Log in with NEAR</button>}
         </div>
         <br/>
-        <div className="apps">
-          <ProfileApp app={this.state.apps.profile}/>
-        </div>
+        {this.state.login && (
+          <div className="apps">
+            <Tabs forceRenderTabPanel={true}>
+              <TabList>
+                <Tab>Profile</Tab>
+                <Tab>Mail</Tab>
+              </TabList>
+
+              <TabPanel>
+                <ProfileApp app={this.state.apps.profile}/>
+              </TabPanel>
+              <TabPanel>
+                <MailApp app={this.state.apps.mail}/>
+              </TabPanel>
+            </Tabs>
+          </div>
+        )}
       </div>
     )
   }

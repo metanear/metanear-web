@@ -4,14 +4,11 @@ import React from "react";
 export class ProfileApp extends React.Component {
   constructor(props) {
     super(props);
-    this.generateMethods([
+    const keys = [
       "displayName",
       "profileUrl",
       "bio",
-    ]);
-  }
-
-  generateMethods(keys) {
+    ];
     this.state = keys.reduce((acc, key) => {
       acc[key] = "";
       acc.chainValues[key] = null;
@@ -49,15 +46,16 @@ export class ProfileApp extends React.Component {
     });
   }
 
-  save() {
+  async save() {
     console.log("Saving");
     const chainValues = Object.assign({}, this.state.chainValues);
+    let p = Promise.resolve();
     this.state.keys.forEach(key => {
       if (this.state.chainValues[key] !== this.state[key]) {
         chainValues[key] = this.state[key];
-        this.props.app.set(key, this.state[key]).then(() => {
+        p = p.then(() => this.props.app.set(key, this.state[key]).then(() => {
           console.log("Updated key `" + key + "` to value `" + this.state[key] + '`');
-        })
+        }));
       }
     });
     this.setState({
@@ -68,25 +66,22 @@ export class ProfileApp extends React.Component {
   render() {
     return (
       <div>
-        <h3>Profile</h3>
-        <div>
-          <div className="form-group">
-            <label htmlFor="displayName">Display Name</label>
-            <input id="displayName" className="form-control" disabled={!this.props.app} value={this.state.displayName} onChange={(e) => this.handleChange('displayName', e.target.value)} />
-          </div>
-          <div className="form-group">
-            <label htmlFor="profileUrl">Profile URL</label>
-            <input id="profileUrl" className="form-control" disabled={!this.props.app} value={this.state.profileUrl}
-                   onChange={(e) => this.handleChange('profileUrl', e.target.value)}/>
-            <img src={this.state.profileUrl} className="img-thumbnail rounded-circle w-25"/>
-          </div>
-          <div className="form-group">
-            <label htmlFor="bio">Bio</label>
-            <textarea id="bio" className="form-control" disabled={!this.props.app} value={this.state.bio} onChange={(e) => this.handleChange('bio', e.target.value)} />
-          </div>
-          <div className="form-group">
-            <button onClick={() => this.save()}>Save changes</button>
-          </div>
+        <div className="form-group">
+          <label htmlFor="displayName">Display Name</label>
+          <input id="displayName" className="form-control" disabled={!this.props.app} value={this.state.displayName} onChange={(e) => this.handleChange('displayName', e.target.value)} />
+        </div>
+        <div className="form-group">
+          <label htmlFor="profileUrl">Profile URL</label>
+          <input id="profileUrl" className="form-control" disabled={!this.props.app} value={this.state.profileUrl}
+                 onChange={(e) => this.handleChange('profileUrl', e.target.value)}/>
+          <img src={this.state.profileUrl} className="img-thumbnail rounded-circle w-25"/>
+        </div>
+        <div className="form-group">
+          <label htmlFor="bio">Bio</label>
+          <textarea id="bio" className="form-control" disabled={!this.props.app} value={this.state.bio} onChange={(e) => this.handleChange('bio', e.target.value)} />
+        </div>
+        <div className="form-group">
+          <button onClick={() => this.save()}>Save changes</button>
         </div>
       </div>
     )
