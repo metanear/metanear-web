@@ -53,7 +53,7 @@ class App extends Component {
     console.log("Querying state...");
     let state = await account.state();
     console.log(state);
-    if (state.code_hash === '11111111111111111111111111111111') {
+    if (state.code_hash !== 'CbG5c4viMES2C47pc8SYWGc4F8W4EBSzD4RLjVqTPDR6') {
       console.log("Going to deploy the code");
       // no code. Need to deploy.
       console.log("Downloading started...");
@@ -61,16 +61,18 @@ class App extends Component {
       let buf = await data.arrayBuffer();
       console.log("Downloading done. Deploying contract...");
       await account.deployContract(new Uint8Array(buf));
-      console.log("Deploying done. Initializing contract...");
-      // Gotta init it.
-      let contract = await new nearlib.Contract(account, accountId, {
-        viewMethods: [],
-        // Change methods can modify the state. But you don't receive the returned value when called.
-        changeMethods: ['new'],
-        // Sender is the account ID to initialize transactions.
-        sender: accountId
-      });
-      console.log(await contract.new());
+      if (state.code_hash === '11111111111111111111111111111111') {
+        console.log("Deploying done. Initializing contract...");
+        // Gotta init it.
+        let contract = await new nearlib.Contract(account, accountId, {
+          viewMethods: [],
+          // Change methods can modify the state. But you don't receive the returned value when called.
+          changeMethods: ['new'],
+          // Sender is the account ID to initialize transactions.
+          sender: accountId
+        });
+        console.log(await contract.new());
+      }
       console.log("Done");
     }
 

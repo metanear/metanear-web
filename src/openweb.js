@@ -7,6 +7,7 @@ export class OpenWebApp {
     this.appId = appId;
     this.accountId = accountId;
     this._config = config;
+    this.blocking = null;
   }
 
   async init() {
@@ -16,7 +17,7 @@ export class OpenWebApp {
     this._near = await nearlib.connect(Object.assign({ deps: { keyStore:  this._keyStore } }, this._config));
     this._account = new nearlib.Account(this._near.connection, this.accountId);
     this._contract = new nearlib.Contract(this._account, this.accountId, {
-      viewMethods: ['get', 'apps'],
+      viewMethods: ['get', 'apps', 'num_messages'],
       changeMethods: ['set', 'remove', 'pull_message', 'send_message'],
       sender: this.accountId
     });
@@ -53,6 +54,19 @@ export class OpenWebApp {
     if (!await this.ready()) {
       throw new Error('Not ready yet');
     }
+  }
+
+  async wrappedCall(call) {
+    if (this.blocking) {
+      try {
+        console.log("Blocking a call");
+        await this.blocking;
+      } catch (_e) {}
+      this.blocking = null;
+      console.log("Unblocked a call");
+    }
+    this.blocking = call;
+    return this.blocking;
   }
 
   async get(key, appId) {
@@ -92,33 +106,37 @@ export class OpenWebApp {
 
   async set(key, value) {
     this.forceReady();
-    await this._contract.set({
+    await this.wrappedCall(this._contract.set({
       key,
       value: JSON.stringify(value),
-    }, GAS);
+    }, GAS));
   }
 
   async remove(key) {
     this.forceReady();
-    await this._contract.remove({
+    await this.wrappedCall(this._contract.remove({
       key,
-    }, GAS);
+    }, GAS));
   }
 
   async pullMessage() {
     this.forceReady();
-    return await this._contract.pull_message({}, GAS);
+    if (await this._contract.num_messages({app_id: this.appId}) > 0) {
+      return await this.wrappedCall(this._contract.pull_message({}, GAS));
+    } else {
+      return null;
+    }
   }
 
   async sendMessage(receiverId, message, appId) {
     this.forceReady();
     receiverId = receiverId || this.accountId;
     appId = appId || this.appId;
-    await this._contract.send_message({
+    await this.wrappedCall(this._contract.send_message({
       receiver_id: receiverId,
       app_id: appId,
       message,
-    }, GAS);
+    }, GAS));
   }
 }
 

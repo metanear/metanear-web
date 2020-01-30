@@ -33,13 +33,15 @@ export class MailApp extends React.Component {
         time: new Date().getTime() - 2 * 1000 * 24 * 60 * 60,
       }
       */],
-         
     }
     this.profileCache = {};
   }
 
   addLetter(letter) {
     console.log(letter);
+    if (!letter) {
+      return;
+    }
     const newInbox = this.state.inbox.slice();
     newInbox.push(letter);
     newInbox.sort((a, b) => a.time - b.time);
@@ -129,7 +131,7 @@ export class MailApp extends React.Component {
     console.log("Fetching messages");
     this.props.app.pullMessage().then((message) => {
       if (!message) {
-        this.fetchTimeoutId = setTimeout(() => { this.fetchMessages() }, 60 * 1000);
+        this.fetchTimeoutId = setTimeout(() => { this.fetchMessages() }, 15 * 1000);
         return;
       }
       try {
@@ -150,9 +152,9 @@ export class MailApp extends React.Component {
 
           this.props.app.set("letter_" + letter.messageId, letter).then(() => {
             console.log("Saved the letter: ", letter);
-            this.props.app.set("numLetters", newNumLetters).then(() => {
+          });
+          this.props.app.set("numLetters", newNumLetters).then(() => {
               console.log("Saved the new number of letters: ", newNumLetters);
-            });
           });
           this.addLetter(letter);
         } else {
@@ -202,6 +204,10 @@ export class MailApp extends React.Component {
     }
   }
 
+  selectLetter(letter) {
+    this.handleChange("receiverId", letter.sender);
+  }
+
   render() {
     const profile = this.state.profileLoading ? (
       <div className="col">
@@ -216,7 +222,11 @@ export class MailApp extends React.Component {
       </div>
     ) : null;
     const inbox = this.props.app ?
-      this.state.inbox.map((letter, i) => <Letter key={letter.messageId} fetchProfile={(a) => this.fetchProfile(a)} letter={letter}/>) :
+      this.state.inbox.map((letter, i) => <Letter
+          key={letter.messageId}
+          fetchProfile={(a) => this.fetchProfile(a)}
+          letter={letter}
+          selectLetter={(letter) => this.selectLetter(letter)}/>) :
       null;
     return (
       <div>
@@ -262,6 +272,7 @@ export class Letter extends React.Component {
         profileUrl: null,
         displayName: '@' + props.letter.sender,
       },
+      expanded: false,
     };
   }
 
@@ -273,9 +284,16 @@ export class Letter extends React.Component {
     });
   }
 
+  onClick() {
+    this.setState({
+      expanded: !this.state.expanded,
+    });
+    this.props.selectLetter(this.props.letter);
+  }
+
   render() {
     return (
-      <div className="row letter">
+      <div className={"row letter " + (this.state.expanded ? "expanded" : "")} onClick={() => this.onClick()}>
         <div className="col letter-profile">
           <img className="letter-profile-image" src={this.state.profile.profileUrl}/>
           <label className="letter-profile-name">{this.state.profile.displayName}</label>

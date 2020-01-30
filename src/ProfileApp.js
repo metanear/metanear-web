@@ -49,13 +49,12 @@ export class ProfileApp extends React.Component {
   async save() {
     console.log("Saving");
     const chainValues = Object.assign({}, this.state.chainValues);
-    let p = Promise.resolve();
     this.state.keys.forEach(key => {
       if (this.state.chainValues[key] !== this.state[key]) {
         chainValues[key] = this.state[key];
-        p = p.then(() => this.props.app.set(key, this.state[key]).then(() => {
+        this.props.app.set(key, this.state[key]).then(() => {
           console.log("Updated key `" + key + "` to value `" + this.state[key] + '`');
-        }));
+        });
       }
     });
     this.setState({

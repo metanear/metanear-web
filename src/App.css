@@ -56,6 +56,11 @@
   cursor: pointer;
 }
 
+.expanded {
+  overflow: auto;
+  height: auto;
+}
+
 .letter:hover {
   background: #eee;
 }
