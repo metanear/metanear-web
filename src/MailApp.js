@@ -269,8 +269,8 @@ export class MailApp extends React.Component {
           letter={letter}
           expanded={letter.messageId == this.state.expandedId}
           deleteLetter={(letter) => this.deleteLetter(letter)}
-          replyTo={(letter) => this.replyTo(letter)}
-          selectLetter={(letter, displayName) => this.selectLetter(letter, displayName)}/>) :
+          replyTo={(letter, displayName) => this.replyTo(letter, displayName)}
+          selectLetter={(letter) => this.selectLetter(letter)}/>) :
       null;
     return (
       <div>
