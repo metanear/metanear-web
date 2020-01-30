@@ -230,7 +230,7 @@ export class MailApp extends React.Component {
 
   selectLetter(letter) {
     this.setState({
-      expandedId: letter.messageId,
+      expandedId: (this.state.expandedId === letter.messageId) ? -1 : letter.messageId,
     });
     if (!letter.read) {
       letter = JSON.parse(JSON.stringify(letter));
@@ -332,10 +332,18 @@ export class Letter extends React.Component {
   }
 
   render() {
+    const profileName = this.props.expanded ? (
+      <span className="letter-expanded-profile">
+        <span className="letter-profile-name">{this.state.profile.displayName}</span>
+        <span className="letter-account-id">{"(@" + this.props.letter.sender + ")"}</span>
+      </span>
+    ) : (
+      <span className="letter-profile-name">{this.state.profile.displayName}</span>
+    );
     const profile = (
       <div className="col-3 letter-profile">
         <img className="letter-profile-image" src={this.state.profile.profileUrl}/>
-        <span className="letter-profile-name">{this.state.profile.displayName}</span>
+        {profileName}
       </div>
     );
     const subject = (

@@ -99,7 +99,10 @@
 .letter-profile-name {
   overflow: hidden;
   margin-left: 0.5em;
-  vertical-align: middle;
+}
+
+.letter-account-id {
+  color: #999;
 }
 
 .letter-unread {
