@@ -1,5 +1,7 @@
 import React from "react";
 
+const RE = "Re: ";
+
 export class MailApp extends React.Component {
   constructor(props) {
     super(props);
@@ -44,7 +46,7 @@ export class MailApp extends React.Component {
     }
     const newInbox = this.state.inbox.slice();
     newInbox.push(letter);
-    newInbox.sort((a, b) => a.time - b.time);
+    newInbox.sort((a, b) => b.time - a.time);
     this.setState({
       inbox: newInbox
     });
@@ -204,8 +206,15 @@ export class MailApp extends React.Component {
     }
   }
 
-  selectLetter(letter) {
+  selectLetter(letter, displayName) {
     this.handleChange("receiverId", letter.sender);
+    this.handleChange("subject", (letter.subject.startsWith(RE) ? "" : RE) + letter.subject);
+    this.handleChange("content", [
+      "",
+      "",
+      ["On", new Date(letter.time).toLocaleDateString(), displayName, "@" + letter.sender, "wrote:"].join(' '),
+      ... letter.content.split(/\r?\n/).map(s => "| " + s)
+    ].join("\n"));
   }
 
   render() {
@@ -226,11 +235,11 @@ export class MailApp extends React.Component {
           key={letter.messageId}
           fetchProfile={(a) => this.fetchProfile(a)}
           letter={letter}
-          selectLetter={(letter) => this.selectLetter(letter)}/>) :
+          selectLetter={(letter, displayName) => this.selectLetter(letter, displayName)}/>) :
       null;
     return (
       <div>
-        <h3>Inbox</h3>
+        Inbox <button className="btn btn-sm" onClick={() => this.fetchMessages()}>🔄</button>
         <div>
           {inbox}
         </div>
@@ -288,7 +297,7 @@ export class Letter extends React.Component {
     this.setState({
       expanded: !this.state.expanded,
     });
-    this.props.selectLetter(this.props.letter);
+    this.props.selectLetter(this.props.letter, this.state.profile.displayName);
   }
 
   render() {

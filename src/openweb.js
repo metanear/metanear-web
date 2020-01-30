@@ -7,7 +7,7 @@ export class OpenWebApp {
     this.appId = appId;
     this.accountId = accountId;
     this._config = config;
-    this.blocking = null;
+    this.blocking = Promise.resolve();
   }
 
   async init() {
@@ -56,16 +56,8 @@ export class OpenWebApp {
     }
   }
 
-  async wrappedCall(call) {
-    if (this.blocking) {
-      try {
-        console.log("Blocking a call");
-        await this.blocking;
-      } catch (_e) {}
-      this.blocking = null;
-      console.log("Unblocked a call");
-    }
-    this.blocking = call;
+  wrappedCall(call) {
+    this.blocking = this.blocking.then(() => call()).catch(() => call());
     return this.blocking;
   }
 
@@ -106,7 +98,7 @@ export class OpenWebApp {
 
   async set(key, value) {
     this.forceReady();
-    await this.wrappedCall(this._contract.set({
+    await this.wrappedCall(() => this._contract.set({
       key,
       value: JSON.stringify(value),
     }, GAS));
@@ -114,7 +106,7 @@ export class OpenWebApp {
 
   async remove(key) {
     this.forceReady();
-    await this.wrappedCall(this._contract.remove({
+    await this.wrappedCall(() => this._contract.remove({
       key,
     }, GAS));
   }
@@ -122,7 +114,7 @@ export class OpenWebApp {
   async pullMessage() {
     this.forceReady();
     if (await this._contract.num_messages({app_id: this.appId}) > 0) {
-      return await this.wrappedCall(this._contract.pull_message({}, GAS));
+      return await this.wrappedCall(() => this._contract.pull_message({}, GAS));
     } else {
       return null;
     }
@@ -132,7 +124,7 @@ export class OpenWebApp {
     this.forceReady();
     receiverId = receiverId || this.accountId;
     appId = appId || this.appId;
-    await this.wrappedCall(this._contract.send_message({
+    await this.wrappedCall(() => this._contract.send_message({
       receiver_id: receiverId,
       app_id: appId,
       message,
