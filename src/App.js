@@ -9,6 +9,7 @@ import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
 
 const GAS = 2_000_000_000_000_000;
+const TITLE = "Open Web Home - NEAR"
 
 class App extends Component {
   constructor(props) {
@@ -16,6 +17,7 @@ class App extends Component {
     this.state = {
       login: false,
       apps: {},
+      unread: 0,
     }
     this.signedInFlow = this.signedInFlow.bind(this);
     this.requestSignIn = this.requestSignIn.bind(this);
@@ -147,6 +149,7 @@ class App extends Component {
   }
 
   render() {
+    document.title = (this.state.unread ? `(${this.state.unread}) ` : "") + TITLE;
     return (
       <div className="App-header">
         <div className="image-wrapper">
@@ -163,14 +166,14 @@ class App extends Component {
             <Tabs forceRenderTabPanel={true}>
               <TabList>
                 <Tab>Profile</Tab>
-                <Tab>Mail</Tab>
+                <Tab>Mail {this.state.unread ? `(${this.state.unread})` : ""}</Tab>
               </TabList>
 
               <TabPanel>
                 <ProfileApp app={this.state.apps.profile}/>
               </TabPanel>
               <TabPanel>
-                <MailApp app={this.state.apps.mail}/>
+                <MailApp app={this.state.apps.mail} onNewMail={(unread) => this.setState({unread})}/>
               </TabPanel>
             </Tabs>
           </div>

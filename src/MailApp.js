@@ -14,6 +14,8 @@ export class MailApp extends React.Component {
       profileFetchTimeoutId: null,
       profileFetchIndex: 0,
       numLetters: 0,
+      unread: 0,
+      expandedId: -1,
       inbox: [
         /* {
         messageId: -1,
@@ -39,17 +41,24 @@ export class MailApp extends React.Component {
     this.profileCache = {};
   }
 
-  addLetter(letter) {
-    console.log(letter);
-    if (!letter) {
-      return;
+  modifyLetter(letter, messageId) {
+    if (messageId === undefined) {
+      if (!letter) {
+        return;
+      }
+      messageId = letter.messageId;
     }
-    const newInbox = this.state.inbox.slice();
-    newInbox.push(letter);
-    newInbox.sort((a, b) => b.time - a.time);
+    const inbox = this.state.inbox.filter((a) => a.messageId != messageId);
+    if (letter) {
+      inbox.push(letter);
+    }
+    inbox.sort((a, b) => b.time - a.time);
+    const unread = inbox.reduce((acc, letter) => acc + (letter.read ? 0: 1), 0);
     this.setState({
-      inbox: newInbox
+      inbox,
+      unread,
     });
+    this.props.onNewMail(unread);
   }
 
   async init() {
@@ -63,7 +72,7 @@ export class MailApp extends React.Component {
         numLetters: num,
       })
       for (let i = Math.max(0, num - 10); i < num; ++i) {
-        this.props.app.get('letter_' + i).then((letter) => this.addLetter(letter));
+        this.props.app.get('letter_' + i).then((letter) => this.modifyLetter(letter));
       }
       this.fetchMessages();
     });
@@ -133,7 +142,7 @@ export class MailApp extends React.Component {
     console.log("Fetching messages");
     this.props.app.pullMessage().then((message) => {
       if (!message) {
-        this.fetchTimeoutId = setTimeout(() => { this.fetchMessages() }, 15 * 1000);
+        this.fetchTimeoutId = setTimeout(() => { this.fetchMessages() }, 60 * 1000);
         return;
       }
       try {
@@ -158,7 +167,7 @@ export class MailApp extends React.Component {
           this.props.app.set("numLetters", newNumLetters).then(() => {
               console.log("Saved the new number of letters: ", newNumLetters);
           });
-          this.addLetter(letter);
+          this.modifyLetter(letter);
         } else {
           console.warn("Unknown message", message);
         }
@@ -206,15 +215,38 @@ export class MailApp extends React.Component {
     }
   }
 
-  selectLetter(letter, displayName) {
+  replyTo(letter, displayName) {
     this.handleChange("receiverId", letter.sender);
-    this.handleChange("subject", (letter.subject.startsWith(RE) ? "" : RE) + letter.subject);
-    this.handleChange("content", [
-      "",
-      "",
-      ["On", new Date(letter.time).toLocaleDateString(), displayName, "@" + letter.sender, "wrote:"].join(' '),
-      ... letter.content.split(/\r?\n/).map(s => "| " + s)
-    ].join("\n"));
+    this.setState({
+      subject: (letter.subject.startsWith(RE) ? "" : RE) + letter.subject,
+      content: [
+        "",
+        "",
+        ["On", new Date(letter.time).toLocaleDateString(), displayName, "@" + letter.sender, "wrote:"].join(' '),
+        ...letter.content.split(/\r?\n/).map(s => "| " + s)
+      ].join("\n"),
+    });
+  }
+
+  selectLetter(letter) {
+    this.setState({
+      expandedId: letter.messageId,
+    });
+    if (!letter.read) {
+      letter = JSON.parse(JSON.stringify(letter));
+      letter.read = true;
+      this.props.app.set("letter_" + letter.messageId, letter).then(() => {
+        console.log("Saved the letter: ", letter);
+      });
+      this.modifyLetter(letter);
+    }
+  }
+
+  deleteLetter(letter) {
+    this.props.app.remove("letter_" + letter.messageId).then(() => {
+      console.log("Deleted the letter: ", letter);
+    });
+    this.modifyLetter(null, letter.messageId);
   }
 
   render() {
@@ -227,7 +259,7 @@ export class MailApp extends React.Component {
     ) : this.state.profile ? (
       <div className="col">
         <img className="profile-image" src={this.state.profile.profileUrl}/>
-        <label className="profile-name">{this.state.profile.displayName}</label>
+        <span className="profile-name">{this.state.profile.displayName}</span>
       </div>
     ) : null;
     const inbox = this.props.app ?
@@ -235,6 +267,9 @@ export class MailApp extends React.Component {
           key={letter.messageId}
           fetchProfile={(a) => this.fetchProfile(a)}
           letter={letter}
+          expanded={letter.messageId == this.state.expandedId}
+          deleteLetter={(letter) => this.deleteLetter(letter)}
+          replyTo={(letter) => this.replyTo(letter)}
           selectLetter={(letter, displayName) => this.selectLetter(letter, displayName)}/>) :
       null;
     return (
@@ -281,7 +316,6 @@ export class Letter extends React.Component {
         profileUrl: null,
         displayName: '@' + props.letter.sender,
       },
-      expanded: false,
     };
   }
 
@@ -294,38 +328,70 @@ export class Letter extends React.Component {
   }
 
   onClick() {
-    this.setState({
-      expanded: !this.state.expanded,
-    });
-    this.props.selectLetter(this.props.letter, this.state.profile.displayName);
+    this.props.selectLetter(this.props.letter);
   }
 
   render() {
-    return (
-      <div className={"row letter " + (this.state.expanded ? "expanded" : "")} onClick={() => this.onClick()}>
-        <div className="col letter-profile">
-          <img className="letter-profile-image" src={this.state.profile.profileUrl}/>
-          <label className="letter-profile-name">{this.state.profile.displayName}</label>
-        </div>
-        <div className="col">
-          <div className="letter-subject">{this.props.letter.subject}</div>
-        </div>
-        <div className="col">
-          <div className="letter-content">{this.props.letter.content}</div>
-        </div>
-        <div className="col">
-          <div className="letter-time">{timeFormat(this.props.letter.time)}</div>
-        </div>
+    const profile = (
+      <div className="col-3 letter-profile">
+        <img className="letter-profile-image" src={this.state.profile.profileUrl}/>
+        <span className="letter-profile-name">{this.state.profile.displayName}</span>
       </div>
     );
+    const subject = (
+      <div className="col">
+        <div className="letter-subject">{this.props.letter.subject}</div>
+      </div>
+    );
+    const time = (
+      <div className="col-1">
+        <div className="letter-time">{timeFormat(this.props.letter.time)}</div>
+      </div>
+    );
+    if (this.props.expanded) {
+      return (
+        <div className="letter letter-expanded">
+          <div className="row letter-expanded-header" onClick={() => this.onClick()}>
+            {profile}
+            {subject}
+            {time}
+          </div>
+          <div className="letter-content-expanded">
+            <pre>{this.props.letter.content}</pre>
+            <div className="row">
+              <div className="col">
+                <button className="btn btn-primary" onClick={() => this.props.replyTo(this.props.letter, this.state.profile.displayName)}>Reply</button>
+              </div>
+              <div className="col">
+                <button className="btn btn-danger float-right" onClick={() => this.props.deleteLetter(this.props.letter)}>DELETE THIS!</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    } else {
+      return (
+        <div className={"row letter letter-small" + (this.props.letter.read ? " letter-read" : " letter-unread")} onClick={() => this.onClick()}>
+          {profile}
+          {subject}
+          <div className="col">
+            <div className="letter-content">{this.props.letter.content}</div>
+          </div>
+          {time}
+        </div>
+      );
+    }
   }
 }
 
 function timeFormat(t) {
   const d = new Date(t);
   const now = new Date();
-  if (now.getDate() == d.getDate()) {
-    return d.toLocaleTimeString();
+  if (now.getDate() === d.getDate()) {
+    const hour = d.getHours() % 12;
+    const minute = d.getMinutes().toString().padStart(2, '0');
+    const daytime = d.getHours() >= 12 ? "PM" : "AM";
+    return `${hour}:${minute} ${daytime}`;
   } else {
     return d.toLocaleDateString();
   }
