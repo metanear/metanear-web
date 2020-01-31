@@ -1,4 +1,5 @@
 import React from "react";
+import anon from "./assets/anon.png";
 
 
 export class ProfileApp extends React.Component {
@@ -65,22 +66,31 @@ export class ProfileApp extends React.Component {
   render() {
     return (
       <div>
-        <div className="form-group">
-          <label htmlFor="displayName">Display Name</label>
-          <input id="displayName" className="form-control" disabled={!this.props.app} value={this.state.displayName} onChange={(e) => this.handleChange('displayName', e.target.value)} />
+        <div>
+          <img className="profile-image" src={this.state.profileUrl || anon}/>
+          <span className="letter-expanded-profile">
+            <span className="letter-profile-name">{this.state.displayName}</span>
+            {this.props.app && <span className="letter-account-id">{"(@" + this.props.app.accountId + ")"}</span>}
+          </span>
         </div>
-        <div className="form-group">
-          <label htmlFor="profileUrl">Profile URL</label>
-          <input id="profileUrl" className="form-control" disabled={!this.props.app} value={this.state.profileUrl}
-                 onChange={(e) => this.handleChange('profileUrl', e.target.value)}/>
-          <img src={this.state.profileUrl} className="img-thumbnail rounded-circle w-25"/>
-        </div>
-        <div className="form-group">
-          <label htmlFor="bio">Bio</label>
-          <textarea id="bio" className="form-control" disabled={!this.props.app} value={this.state.bio} onChange={(e) => this.handleChange('bio', e.target.value)} />
-        </div>
-        <div className="form-group">
-          <button onClick={() => this.save()}>Save changes</button>
+        <hr/>
+        <div>
+          <div className="form-group">
+            <label htmlFor="displayName">Display Name</label>
+            <input placeholder="The REAL Satoshi" id="displayName" className="form-control" disabled={!this.props.app} value={this.state.displayName} onChange={(e) => this.handleChange('displayName', e.target.value)} />
+          </div>
+          <div className="form-group">
+            <label htmlFor="profileUrl">Profile URL</label>
+            <input placeholder={"https://metanear.com" + anon} id="profileUrl" className="form-control" disabled={!this.props.app} value={this.state.profileUrl}
+                   onChange={(e) => this.handleChange('profileUrl', e.target.value)}/>
+          </div>
+          <div className="form-group">
+            <label htmlFor="bio">Bio</label>
+            <textarea placeholder="I'm working on Bitcoin, so bankers can go home." id="bio" className="form-control" disabled={!this.props.app} value={this.state.bio} onChange={(e) => this.handleChange('bio', e.target.value)} />
+          </div>
+          <div className="form-group">
+            <button onClick={() => this.save()}>Save changes</button>
+          </div>
         </div>
       </div>
     )
