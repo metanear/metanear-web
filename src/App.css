@@ -14,7 +14,7 @@
 .apps {
   background: #fff;
   text-align: left;
-  margin: 3em;
+  margin: 0.5em;
 }
 
 .App-logo {
@@ -43,14 +43,12 @@
 }
 
 .profile-name {
-  overflow: hidden;
+  overflow-y: hidden;
   margin-left: 0.5em;
   vertical-align: middle;
 }
 
 .letter-small {
-  overflow: hidden;
-  height: 3em;
   line-height: 3em;
   cursor: pointer;
 }
@@ -60,8 +58,6 @@
 
 .letter-expanded-header {
   background: #eee;
-  overflow: hidden;
-  height: 3em;
   line-height: 3em;
   cursor: pointer;
   margin: 0;
@@ -117,6 +113,7 @@
   color: #999;
   overflow: hidden;
   font-weight: normal;
+  height: 3em;
 }
 
 .letter-content-expanded {

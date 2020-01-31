@@ -1,4 +1,5 @@
 import React from "react";
+import anon from "./assets/anon.png";
 
 const RE = "Re: ";
 
@@ -17,7 +18,8 @@ export class MailApp extends React.Component {
       unread: 0,
       expandedId: -1,
       inbox: [
-        /* {
+        /*
+        {
         messageId: -1,
         sender: "potato-lord",
         subject: "DOPE",
@@ -36,8 +38,11 @@ export class MailApp extends React.Component {
         content: "Best idea ever!",
         time: new Date().getTime() - 2 * 1000 * 24 * 60 * 60,
       }
-      */],
+      */
+
+      ],
     }
+    this.textarea = React.createRef();
     this.profileCache = {};
   }
 
@@ -226,6 +231,7 @@ export class MailApp extends React.Component {
         ...letter.content.split(/\r?\n/).map(s => "| " + s)
       ].join("\n"),
     });
+    this.textarea.current.focus();
   }
 
   selectLetter(letter) {
@@ -258,11 +264,11 @@ export class MailApp extends React.Component {
       </div>
     ) : this.state.profile ? (
       <div className="col">
-        <img className="profile-image" src={this.state.profile.profileUrl}/>
+        <img className="profile-image" src={this.state.profile.profileUrl || anon}/>
         <span className="profile-name">{this.state.profile.displayName}</span>
       </div>
     ) : null;
-    const inbox = this.props.app ?
+    const inbox = true || this.props.app ?
       this.state.inbox.map((letter, i) => <Letter
           key={letter.messageId}
           fetchProfile={(a) => this.fetchProfile(a)}
@@ -298,7 +304,7 @@ export class MailApp extends React.Component {
           <input type="text" className="form-control" id="subject" placeholder="Subject" disabled={!this.props.app} value={this.state.subject} onChange={(e) => this.handleChange('subject', e.target.value)} />
         </div>
         <div className="form-group">
-          <textarea id="content" className="form-control" rows="7" disabled={!this.props.app} value={this.state.content} onChange={(e) => this.handleChange('content', e.target.value)} />
+          <textarea ref={this.textarea} id="content" className="form-control" rows="7" disabled={!this.props.app} value={this.state.content} onChange={(e) => this.handleChange('content', e.target.value)} />
         </div>
         <div className="form-group">
           <button className="form-control form-control-lg btn btn-primary" disabled={!this.state.profile || this.state.sending} onClick={() => this.sendMail()}>Send</button>
@@ -341,18 +347,18 @@ export class Letter extends React.Component {
       <span className="letter-profile-name">{this.state.profile.displayName}</span>
     );
     const profile = (
-      <div className="col-3 letter-profile">
-        <img className="letter-profile-image" src={this.state.profile.profileUrl}/>
+      <div className="col-sm-6 col-md-4 col-lg-3 letter-profile">
+        <img className="letter-profile-image" src={this.state.profile.profileUrl || anon}/>
         {profileName}
       </div>
     );
     const subject = (
-      <div className="col">
+      <div className="col-sm-4 col-md">
         <div className="letter-subject">{this.props.letter.subject}</div>
       </div>
     );
     const time = (
-      <div className="col-1">
+      <div className={"col-sm-2 col-lg-1" + (this.props.expanded ? "" : " d-none d-md-block")}>
         <div className="letter-time">{timeFormat(this.props.letter.time)}</div>
       </div>
     );
@@ -367,10 +373,10 @@ export class Letter extends React.Component {
           <div className="letter-content-expanded">
             <pre>{this.props.letter.content}</pre>
             <div className="row">
-              <div className="col">
+              <div className="col-xs">
                 <button className="btn btn-primary" onClick={() => this.props.replyTo(this.props.letter, this.state.profile.displayName)}>Reply</button>
               </div>
-              <div className="col">
+              <div className="col-xs">
                 <button className="btn btn-danger float-right" onClick={() => this.props.deleteLetter(this.props.letter)}>DELETE THIS!</button>
               </div>
             </div>
@@ -382,7 +388,7 @@ export class Letter extends React.Component {
         <div className={"row letter letter-small" + (this.props.letter.read ? " letter-read" : " letter-unread")} onClick={() => this.onClick()}>
           {profile}
           {subject}
-          <div className="col">
+          <div className="col-sm d-none d-lg-block">
             <div className="letter-content">{this.props.letter.content}</div>
           </div>
           {time}
