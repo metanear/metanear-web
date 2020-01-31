@@ -34,7 +34,15 @@
     transform: rotate(360deg);
   }
 }
+.loading-div pre {
+  background: #000;
+  color: #0f0;
+}
 
+.loading-spinner {
+  width: 3em;
+  height: 3em;
+}
 
 .profile-image {
   height: 3em;
@@ -52,6 +60,8 @@
   line-height: 3em;
   cursor: pointer;
 }
+
+
 
 .letter-expanded {
 }

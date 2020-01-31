@@ -17,7 +17,9 @@ class App extends Component {
     this.state = {
       login: false,
       apps: {},
+      logs: [],
       unread: 0,
+      loading: false,
     }
     this.signedInFlow = this.signedInFlow.bind(this);
     this.requestSignIn = this.requestSignIn.bind(this);
@@ -35,11 +37,19 @@ class App extends Component {
     }
   }
 
+  log(message) {
+    console.log(message);
+    this.setState({
+      logs: this.state.logs.concat([message])
+    })
+  }
+
   async signedInFlow() {
     console.log("come in sign in flow")
     const accountId = await this.props.wallet.getAccountId()
     this.setState({
       login: true,
+      loading: true,
       accountId,
     })
     if (window.location.search.includes("account_id")) {
@@ -50,21 +60,28 @@ class App extends Component {
     }
     // Initializing our contract APIs by contract name and configuration.
 
-    console.log("Connecting to account...");
+    this.log("Connecting to account...");
     const account = await new nearlib.Account(window.near.connection, accountId);
-    console.log("Querying state...");
+    this.log("Querying state...");
     let state = await account.state();
+    /*
+    await new Promise((resolve, reject) =>{
+      setTimeout(() => {
+        resolve();
+      }, 5000);
+    })
+     */
     console.log(state);
     if (state.code_hash !== 'CbG5c4viMES2C47pc8SYWGc4F8W4EBSzD4RLjVqTPDR6') {
-      console.log("Going to deploy the code");
+      this.log("Going to deploy the code");
       // no code. Need to deploy.
-      console.log("Downloading started...");
+      this.log("Downloading started...");
       let data = await fetch('/open_web.wasm');
       let buf = await data.arrayBuffer();
-      console.log("Downloading done. Deploying contract...");
+      this.log("Downloading done. Deploying contract...");
       await account.deployContract(new Uint8Array(buf));
       if (state.code_hash === '11111111111111111111111111111111') {
-        console.log("Deploying done. Initializing contract...");
+        this.log("Deploying done. Initializing contract...");
         // Gotta init it.
         let contract = await new nearlib.Contract(account, accountId, {
           viewMethods: [],
@@ -75,7 +92,7 @@ class App extends Component {
         });
         console.log(await contract.new());
       }
-      console.log("Done");
+      this.log("The contract is deployed");
     }
 
     const masterContract = await new nearlib.Contract(account, accountId, {
@@ -89,10 +106,10 @@ class App extends Component {
 
     this.masterContract = masterContract;
     window.masterContract = masterContract;
-    console.log("Fetching authorized apps...");
+    this.log("Fetching authorized apps...");
     console.log("Apps:", await masterContract.apps());
 
-    console.log("Initializing local apps...");
+    this.log("Initializing local apps...");
     const apps = {
       profile: await this.initOpenWebApp('profile', accountId),
       graph: await this.initOpenWebApp('graph', accountId),
@@ -102,17 +119,18 @@ class App extends Component {
     this.apps = apps;
     this.setState({
       apps,
+      loading: false,
     })
     console.log(apps);
   }
 
   async initOpenWebApp(appId, accountId) {
-    console.log("Initializing app: " + appId + " ...");
+    this.log("Initializing app: " + appId + " ...");
     const app = await new OpenWebApp(appId, accountId, window.nearConfig);
     await app.init();
     if (!await app.ready()) {
       let pk = await app.getPublicKey();
-      console.log("Authorizing app for key " + pk.toString() + " ...");
+      this.log("Authorizing app for key " + pk.toString() + " ...");
       const args = {
         public_key: [...nearlib.utils.serialize.serialize(nearlib.transactions.SCHEMA, pk)],
         app_id: appId,
@@ -120,7 +138,7 @@ class App extends Component {
       await this.masterContract.add_app_key(args, GAS);
       await app.onKeyAdded();
     }
-    console.log("Done");
+    this.log("Done");
     return app;
   }
 
@@ -161,8 +179,18 @@ class App extends Component {
             : <button onClick={this.requestSignIn}>Log in with NEAR</button>}
         </div>
         <br/>
+        {this.state.loading && (
+          <div className="loading-div">
+            <div className="spinner-grow loading-spinner" role="status">
+              <span className="sr-only">Loading...</span>
+            </div>
+            <pre className="text-left">
+              {this.state.logs.join("\n")}
+            </pre>
+          </div>
+        )}
         {this.state.login && (
-          <div className="apps">
+          <div className={"apps" + (this.state.loading ? " d-none" : "")}>
             <Tabs forceRenderTabPanel={true}>
               <TabList>
                 <Tab>Profile</Tab>

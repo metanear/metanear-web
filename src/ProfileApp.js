@@ -21,7 +21,7 @@ export class ProfileApp extends React.Component {
   }
 
   async init() {
-    console.log("init");
+    console.log("init profile");
     this.setState({
       initialized: true,
     });

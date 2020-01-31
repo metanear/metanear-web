@@ -230,8 +230,12 @@ export class MailApp extends React.Component {
         ["On", new Date(letter.time).toLocaleDateString(), displayName, "@" + letter.sender, "wrote:"].join(' '),
         ...letter.content.split(/\r?\n/).map(s => "| " + s)
       ].join("\n"),
+    }, () => {
+      this.textarea.current.focus();
+      this.textarea.current.setSelectionRange(0, 0);
+      this.textarea.current.scrollLeft = 0;
+      this.textarea.current.scrollTop = 0;
     });
-    this.textarea.current.focus();
   }
 
   selectLetter(letter) {
@@ -373,10 +377,10 @@ export class Letter extends React.Component {
           <div className="letter-content-expanded">
             <pre>{this.props.letter.content}</pre>
             <div className="row">
-              <div className="col-xs">
+              <div className="col-sm">
                 <button className="btn btn-primary" onClick={() => this.props.replyTo(this.props.letter, this.state.profile.displayName)}>Reply</button>
               </div>
-              <div className="col-xs">
+              <div className="col-sm">
                 <button className="btn btn-danger float-right" onClick={() => this.props.deleteLetter(this.props.letter)}>DELETE THIS!</button>
               </div>
             </div>
