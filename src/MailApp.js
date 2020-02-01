@@ -342,16 +342,14 @@ export class Letter extends React.Component {
   }
 
   render() {
-    const profileName = this.props.expanded ? (
+    const profileName = (
       <span className="letter-expanded-profile">
         <span className="letter-profile-name">{this.state.profile.displayName}</span>
         <span className="letter-account-id">{"(@" + this.props.letter.sender + ")"}</span>
       </span>
-    ) : (
-      <span className="letter-profile-name">{this.state.profile.displayName}</span>
-    );
+    )
     const profile = (
-      <div className="col-sm-6 col-md-4 col-lg-3 letter-profile">
+      <div className="col-sm-6 col-md-4 col-lg-4 letter-profile">
         <img className="letter-profile-image" src={this.state.profile.profileUrl || anon}/>
         {profileName}
       </div>
@@ -361,8 +359,12 @@ export class Letter extends React.Component {
         <div className="letter-subject">{this.props.letter.subject}</div>
       </div>
     );
-    const time = (
-      <div className={"col-sm-2 col-lg-1" + (this.props.expanded ? "" : " d-none d-md-block")}>
+    const time = this.props.expanded ? (
+      <div className="col-sm-2 col-lg-2">
+        <div className="letter-time">{longTimeFormat(this.props.letter.time)}</div>
+      </div>
+    ) : (
+      <div className="col-sm-2 col-lg-1 d-none d-md-block">
         <div className="letter-time">{timeFormat(this.props.letter.time)}</div>
       </div>
     );
@@ -400,6 +402,10 @@ export class Letter extends React.Component {
       );
     }
   }
+}
+
+function longTimeFormat(t) {
+  return new Date(t).toLocaleString();
 }
 
 function timeFormat(t) {
