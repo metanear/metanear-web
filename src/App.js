@@ -2,10 +2,12 @@ import React, { Component } from 'react';
 import nearlogo from './assets/gray_near_logo.svg';
 import './App.css';
 import * as nearlib from "nearlib";
-import {OpenWebApp} from './openweb.js';
-import {ProfileApp} from "./ProfileApp";
-import {MailApp} from "./MailApp";
+import { OpenWebApp } from './openweb.js';
+import { ProfileApp } from "./ProfileApp";
+import { MailApp } from "./MailApp";
+import { AuthApp } from "./AuthApp";
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
+import { BrowserRouter as Router, Route, Redirect } from "react-router-dom";
 import 'react-tabs/style/react-tabs.css';
 
 const GAS = 2_000_000_000_000_000;
@@ -25,13 +27,19 @@ class App extends Component {
     this.requestSignIn = this.requestSignIn.bind(this);
     this.requestSignOut = this.requestSignOut.bind(this);
     this.signedOutFlow = this.signedOutFlow.bind(this);
+    this.checkSignIn = this.checkSignIn.bind(this);
+    this.initOpenWebApp = this.initOpenWebApp.bind(this);
     window.nearlib = nearlib;
   }
 
   componentDidMount() {
+    this.checkSignIn();
+  }
+
+  async checkSignIn() {
     let loggedIn = window.walletAccount.isSignedIn();
     if (loggedIn) {
-      this.signedInFlow();
+      await this.signedInFlow();
     } else {
       this.signedOutFlow();
     }
@@ -109,11 +117,13 @@ class App extends Component {
     this.log("Fetching authorized apps...");
     console.log("Apps:", await masterContract.apps());
 
+    // this.initOpenWebApp = this.initOpenWebApp.bind(this);
+    
     this.log("Initializing local apps...");
     const apps = {
       profile: await this.initOpenWebApp('profile', accountId),
       graph: await this.initOpenWebApp('graph', accountId),
-      mail: await this.initOpenWebApp('mail', accountId),
+      mail: await this.initOpenWebApp('mail', accountId)
     };
     window.apps = apps;
     this.apps = apps;
@@ -169,44 +179,49 @@ class App extends Component {
   render() {
     document.title = (this.state.unread ? `(${this.state.unread}) ` : "") + TITLE;
     return (
-      <div className="App-header">
-        <div className="image-wrapper">
-          <img className="logo" src={nearlogo} alt="NEAR logo" />
-        </div>
-        <h1>Hello{this.state.login ? ", " + this.state.accountId : "?"}</h1>
-        <div>
-          {this.state.login ? <button onClick={this.requestSignOut}>Log out</button>
-            : <button onClick={this.requestSignIn}>Log in with NEAR</button>}
-        </div>
-        <br/>
-        {this.state.loading && (
-          <div className="loading-div">
-            <div className="spinner-grow loading-spinner" role="status">
-              <span className="sr-only">Loading...</span>
+      <Router>
+        <div className="App-header">
+          <div className="image-wrapper">
+            <img className="logo" src={nearlogo} alt="NEAR logo" />
+          </div>
+          <h1>Hello{this.state.login ? ", " + this.state.accountId : "?"}</h1>
+          <div>
+            {this.state.login ? <button onClick={this.requestSignOut}>Log out</button>
+              : <button onClick={this.requestSignIn}>Log in with NEAR</button>}
+          </div>
+          <br/>
+          {this.state.loading && (
+            <div className="loading-div">
+              <div className="spinner-grow loading-spinner" role="status">
+                <span className="sr-only">Loading...</span>
+              </div>
+              <pre className="text-left">
+                {this.state.logs.join("\n")}
+              </pre>
             </div>
-            <pre className="text-left">
-              {this.state.logs.join("\n")}
-            </pre>
-          </div>
-        )}
-        {this.state.login && (
-          <div className={"apps" + (this.state.loading ? " d-none" : "")}>
-            <Tabs forceRenderTabPanel={true}>
-              <TabList>
-                <Tab>Profile</Tab>
-                <Tab>Mail {this.state.unread ? `(${this.state.unread})` : ""}</Tab>
-              </TabList>
+          )}
+          {this.state.login && (
+            <div className={"apps" + (this.state.loading ? " d-none" : "")}>
+              <Route 
+                path="/auth"
+                render={(props) => <AuthApp {...props} app={this.state.apps.profile} initOpenWebApp={this.initOpenWebApp}/>}/>
+              <Tabs forceRenderTabPanel={true}>
+                <TabList>
+                  <Tab>Profile</Tab>
+                  <Tab>Mail {this.state.unread ? `(${this.state.unread})` : ""}</Tab>
+                </TabList>
 
-              <TabPanel>
-                <ProfileApp app={this.state.apps.profile}/>
-              </TabPanel>
-              <TabPanel>
-                <MailApp app={this.state.apps.mail} onNewMail={(unread) => this.setState({unread})}/>
-              </TabPanel>
-            </Tabs>
-          </div>
-        )}
-      </div>
+                <TabPanel>
+                  <ProfileApp app={this.state.apps.profile}/>
+                </TabPanel>
+                <TabPanel>
+                  <MailApp app={this.state.apps.mail} onNewMail={(unread) => this.setState({unread})}/>
+                </TabPanel>
+              </Tabs>
+            </div>
+          )}
+        </div>
+      </Router>
     )
   }
 
