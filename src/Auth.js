@@ -1,7 +1,7 @@
 import React from "react";
 import queryString from 'query-string';
 
-export class AuthApp extends React.Component {
+export class Auth extends React.Component {
   constructor(props) {
     super(props);
     const values = queryString.parse(this.props.location.search);
