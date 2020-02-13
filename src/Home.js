@@ -78,7 +78,7 @@ export class Home extends Component {
     })
      */
     console.log(state);
-    if (state.code_hash !== '8yr3D9GtRxUgy2ijKo8dcvNQfjHo2JC5ARryVRcFzF6N') {
+    if (state.code_hash !== 'C8UmYSqATkuyhheJ7i7ryxPjfZL4nV8PfkovdMKitsmJ') {
       this.log("Going to deploy the code");
       // no code. Need to deploy.
       this.log("Downloading started...");
