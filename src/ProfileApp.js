@@ -1,8 +1,12 @@
 import React from "react";
 import anon from "./assets/anon.png";
+import Files from "react-files";
 
+const uploadResizeWidth = 96;
+const uploadResizeHeight = 96;
 
 export class ProfileApp extends React.Component {
+
   constructor(props) {
     super(props);
     const keys = [
@@ -42,6 +46,7 @@ export class ProfileApp extends React.Component {
   }
 
   handleChange(key, value) {
+    console.log(value.length);
     this.setState({
       [key]: value,
     });
@@ -63,6 +68,48 @@ export class ProfileApp extends React.Component {
     })
   }
 
+  async onFilesChange(f) {
+    let sourceImage = new Image();
+    let reader = new FileReader();
+
+    reader.readAsDataURL(f[0]);
+
+    sourceImage.onload = () => {
+      // Create a canvas with the desired dimensions
+      let canvas = document.createElement("canvas");
+      const aspect = sourceImage.naturalWidth / sourceImage.naturalHeight;
+      const width = Math.round(uploadResizeWidth * Math.max(1, aspect));
+      const height = Math.round(uploadResizeHeight * Math.max(1, 1 / aspect));
+      canvas.width = uploadResizeWidth;
+      canvas.height = uploadResizeHeight;
+      const ctx = canvas.getContext("2d");
+
+      // Scale and draw the source image to the canvas
+      ctx.imageSmoothingQuality = "high";
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(0, 0, uploadResizeWidth, uploadResizeHeight);
+      ctx.drawImage(sourceImage, (uploadResizeWidth - width) / 2, (uploadResizeHeight - height) / 2, width, height);
+
+      // Convert the canvas to a data URL in PNG format
+      const options = [
+        canvas.toDataURL('image/jpeg', 0.92),
+        canvas.toDataURL('image/webp', 0.92),
+        canvas.toDataURL('image/png')
+      ];
+      options.sort((a, b) => a.length - b.length);
+
+      this.handleChange('profileUrl', options[0]);
+    }
+
+    reader.onload = function(event) {
+      sourceImage.src = event.target.result;
+    };
+  }
+
+  async onFilesError(e, f) {
+    console.log(e, f);
+  }
+
   render() {
     return (
       <div>
@@ -79,10 +126,25 @@ export class ProfileApp extends React.Component {
             <label htmlFor="displayName">Display Name</label>
             <input placeholder="The REAL Satoshi" id="displayName" className="form-control" disabled={!this.props.app} value={this.state.displayName} onChange={(e) => this.handleChange('displayName', e.target.value)} />
           </div>
-          <div className="form-group">
-            <label htmlFor="profileUrl">Profile URL</label>
+          <label htmlFor="profileUrl">Profile URL</label>
+          <div className="input-group">
             <input placeholder={"https://metanear.com" + anon} id="profileUrl" className="form-control" disabled={!this.props.app} value={this.state.profileUrl}
                    onChange={(e) => this.handleChange('profileUrl', e.target.value)}/>
+            <div className="input-group-append">
+              <Files
+                type="button"
+                className='btn btn-outline-primary'
+                onChange={(f) => this.onFilesChange(f)}
+                onError={(e, f) => this.onFilesError(e, f)}
+                multiple={false}
+                accepts={['image/*']}
+                minFileSize={1}
+                clickable
+              >
+                Click to upload
+              </Files>
+            </div>
+
           </div>
           <div className="form-group">
             <label htmlFor="bio">Bio</label>
