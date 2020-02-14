@@ -2,6 +2,7 @@ import React from "react";
 import anon from "./assets/anon.png";
 
 const RE = "Re: ";
+const currentVersion = 1;
 
 export class MailApp extends React.Component {
   constructor(props) {
@@ -66,21 +67,41 @@ export class MailApp extends React.Component {
     this.props.onNewMail(unread);
   }
 
+  async migrateFrom(version) {
+    if (version == 0) {
+      console.log("Migrating from version #0");
+      const num = await this.props.app.get('numLetters');
+      const allMigrations = [this.props.app.set('numLetters', num, { encrypted: true })];
+      for (let i = 0; i < num; ++i) {
+        allMigrations.push(this.props.app.get('letter_' + i).then((letter) => {
+          if (letter) {
+            this.props.app.set('letter_' + i, letter, {encrypted: true});
+          }
+        }).catch((e) => console.log("Can't migrate letter #", i, e)));
+      }
+      await Promise.all(allMigrations);
+      version++;
+    }
+    await this.props.app.set('version', version, { encrypted: true });
+  }
+
   async init() {
     console.log("init");
     this.setState({
       initialized: true,
     });
-    this.props.app.get('numLetters').then((num) => {
-      num = num || 0;
-      this.setState({
-        numLetters: num,
-      })
-      for (let i = Math.max(0, num - 10); i < num; ++i) {
-        this.props.app.get('letter_' + i).then((letter) => this.modifyLetter(letter));
-      }
-      this.fetchMessages();
+    const version = await this.props.app.get('version', { encrypted: true }) || 0;
+    if (version < currentVersion) {
+      await this.migrateFrom(version);
+    }
+    const num = await this.props.app.get('numLetters', { encrypted: true }) || 0;
+    this.setState({
+      numLetters: num,
     });
+    for (let i = Math.max(0, num - 10); i < num; ++i) {
+      this.props.app.get('letter_' + i, {encrypted: true}).then((letter) => this.modifyLetter(letter));
+    }
+    this.fetchMessages();
   }
 
   componentDidUpdate(prevProps) {
@@ -96,8 +117,8 @@ export class MailApp extends React.Component {
       console.log("Fetching profile for " + accountId);
       try {
         const values = await Promise.all([
-          this.props.app.getFrom(accountId, 'displayName', 'profile'),
-          this.props.app.getFrom(accountId, 'profileUrl', 'profile'),
+          this.props.app.getFrom(accountId, 'displayName',  { appId: 'profile' }),
+          this.props.app.getFrom(accountId, 'profileUrl', { appId: 'profile' }),
         ]);
         this.profileCache[accountId] = {
           displayName: values[0] || "",
@@ -166,10 +187,10 @@ export class MailApp extends React.Component {
             numLetters: newNumLetters,
           });
 
-          this.props.app.set("letter_" + letter.messageId, letter).then(() => {
+          this.props.app.set("letter_" + letter.messageId, letter, {encrypted: true}).then(() => {
             console.log("Saved the letter: ", letter);
           });
-          this.props.app.set("numLetters", newNumLetters).then(() => {
+          this.props.app.set("numLetters", newNumLetters, {encrypted: true}).then(() => {
               console.log("Saved the new number of letters: ", newNumLetters);
           });
           this.modifyLetter(letter);
@@ -245,7 +266,7 @@ export class MailApp extends React.Component {
     if (!letter.read) {
       letter = JSON.parse(JSON.stringify(letter));
       letter.read = true;
-      this.props.app.set("letter_" + letter.messageId, letter).then(() => {
+      this.props.app.set("letter_" + letter.messageId, letter, {encrypted: true}).then(() => {
         console.log("Saved the letter: ", letter);
       });
       this.modifyLetter(letter);

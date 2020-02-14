@@ -66,7 +66,7 @@ export class OpenWebApp {
   }
 
   /**
-    helper method to assert that the user is logged in
+    helper method to check if the user is logged in with the app
    */
   async ready() {
     const key = await this._keyStore.getKey(this._networkId, this.accountId);
@@ -101,6 +101,10 @@ export class OpenWebApp {
     this._tmpKey = null;
   }
 
+  /**
+   * enforces that the app is ready
+   * @returns {Promise<void>}
+   */
   async forceReady() {
     if (!await this.ready()) {
       throw new Error('Not ready yet');
@@ -153,18 +157,22 @@ export class OpenWebApp {
     get data from a local app.  apps can decide whether or not to encrypt their contents
 
     @param {string} key the key used to store a value in the app
-    @param {string} appId the application ID
-    @param {bool} encrypted flag indicating whether or not the value is box encrypted
+    @param {object} options to specify:
+    - {bool} `encrypted` flag indicating whether or not the value is box encrypted. Default false.
+    - {string} `appId` the name of the app. Same app by default.
     @return {string} the value returned by the local app
    */
-  async get(key, appId, encrypted) {
-    appId = appId || this.appId;
+  async get(key, options) {
+    options = Object.assign({
+      encrypted: false,  // not supported yet
+      appId: this.appId,
+    }, options);
     let str = await this._contract.get({
-      app_id: appId,
+      app_id: options.appId,
       key,
     });
     if (str) {
-      str = JSON.parse(encrypted ? this.decryptSecretBox(str) : str);
+      str = JSON.parse(options.encrypted ? this.decryptSecretBox(str) : str);
     }
     return str;
   }
@@ -174,12 +182,16 @@ export class OpenWebApp {
 
     @param {string} accountId account from which to get a value
     @param {string} key the key to use to identify the value
-    @param {string} appId the name of the app
-    @param {string} encrypted flag indicating whether or not the value is box encrypted
+    @param {object} options to specify:
+     - {bool} `encrypted` flag indicating whether or not the value is box encrypted. Default false.
+     - {string} `appId` the name of the app. Same app by default.
     @return {string} the value returned from the remote app
    */
-  async getFrom(accountId, key, appId, encrypted) {
-    appId = appId || this.appId;
+  async getFrom(accountId, key, options) {
+    options = Object.assign({
+      encrypted: false,  // not supported yet
+      appId: this.appId,
+    }, options);
     const account = new nearlib.Account(this._near.connection, accountId);
     const contract = new nearlib.Contract(account, accountId, {
       viewMethods: ['get'],
@@ -188,11 +200,11 @@ export class OpenWebApp {
     });
 
     let str = await contract.get({
-      app_id: appId,
+      app_id: options.appId,
       key,
     });
     if (str) {
-      str = JSON.parse(encrypted ? this.decryptSecretBox(str) : str);
+      str = JSON.parse(options.encrypted ? this.decryptSecretBox(str) : str);
     }
     return str;
   }
@@ -210,13 +222,17 @@ export class OpenWebApp {
 
     @param {string} key identifier for the value to be set
     @param {string} value the value to be set
-    @param {string} encrypted flag indicating whether or not the value is box encrypted
+    @param {object} options to specify:
+      - {bool} `encrypted` flag indicating whether to encrypt (box) the value. Default false.
    */
-  async set(key, value, encrypted) {
+  async set(key, value, options) {
     this.forceReady();
+    options = Object.assign({
+      encrypted: false,
+    }, options);
     await this.wrappedCall(() => this._contract.set({
       key,
-      value: encrypted ? this.encryptSecretBox(JSON.stringify(value)) : JSON.stringify(value),
+      value: options.encrypted ? this.encryptSecretBox(JSON.stringify(value)) : JSON.stringify(value),
     }, GAS));
   }
 
@@ -251,15 +267,19 @@ export class OpenWebApp {
 
     @param {string} receiverId account id which will receive the message
     @param {string} message the content of the message
-    @param {string} appId the app
+    @param {object} options to specify:
+      - {bool} `encrypted` flag indicating whether or not to encrypt the message with remote key. Default false.
+      - {string} `appId` the app ID to receive the message. Same app by default.
    */
-  async sendMessage(receiverId, message, appId) {
+  async sendMessage(receiverId, message, options) {
     this.forceReady();
-    receiverId = receiverId || this.accountId;
-    appId = appId || this.appId;
+    options = Object.assign({
+      encrypted: false,  // not supported yet
+      appId: this.appId,
+    }, options);
     await this.wrappedCall(() => this._contract.send_message({
       receiver_id: receiverId,
-      app_id: appId,
+      app_id: options.appId,
       message,
     }, GAS));
   }
