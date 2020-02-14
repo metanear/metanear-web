@@ -32,7 +32,7 @@ export class OpenWebApp {
     - if not found, create a new key pair and save it to local storage
    */
   parseEncryptionKey() {
-    const keyKey = "enc_key:" + this.appId + ":";
+    const keyKey = "enc_key:" + this.accountId + ":" + this.appId + ":";
     let key = localStorage.getItem(keyKey);
     if (key) {
       key = nacl.box.keyPair.fromSecretKey(Buffer.from(key, 'base64'));

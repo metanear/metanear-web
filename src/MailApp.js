@@ -75,8 +75,11 @@ export class MailApp extends React.Component {
       for (let i = 0; i < num; ++i) {
         allMigrations.push(this.props.app.get('letter_' + i).then((letter) => {
           if (letter) {
-            this.props.app.set('letter_' + i, letter, {encrypted: true});
+            return this.props.app.set('letter_' + i, letter, {encrypted: true}).then(() => {
+              console.log("Migrated letter #" + i);
+            })
           }
+          return Promise.resolve();
         }).catch((e) => console.log("Can't migrate letter #", i, e)));
       }
       await Promise.all(allMigrations);
@@ -136,6 +139,8 @@ export class MailApp extends React.Component {
       [key]: value,
     };
     if (key === 'receiverId') {
+      value = value.toLowerCase().replace(/[^a-z0-9\-\_\.]/, '');
+      stateChange[key] = value;
       const profileFetchIndex = this.state.profileFetchIndex + 1;
       stateChange.profileFetchIndex = profileFetchIndex;
       stateChange.profile = null;
