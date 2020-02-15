@@ -1,8 +1,11 @@
 import React from "react";
 import anon from "./assets/anon.png";
+import encryptionOn from "./assets/encryptionOn.png";
+import encryptionOff from "./assets/encryptionOff.png";
+import {encryptionKey} from "./openweb";
 
 const RE = "Re: ";
-const currentVersion = 1;
+const currentVersion = 2;
 
 export class MailApp extends React.Component {
   constructor(props) {
@@ -18,30 +21,8 @@ export class MailApp extends React.Component {
       numLetters: 0,
       unread: 0,
       expandedId: -1,
-      inbox: [
-        /*
-        {
-        messageId: -1,
-        sender: "potato-lord",
-        subject: "DOPE",
-        content: "HELLO? HELLLOOOOO?",
-        time: new Date().getTime() - 1000 * 42 * 60,
-      }, {
-        messageId: -2,
-        sender: "potato-lord",
-        subject: "BLABLBALBLABLALBA L BALBLABAL LBLA",
-        content: "HELLO? HELLLOOOOO?HELLO? HELLLOOOOO?HELLO? HELLLOOOOO?HELLO? HELLLOOOOO?HELLO? HELLLOOOOO?",
-        time: new Date().getTime() - 1000 * 23 * 60 * 60,
-      }, {
-        messageId: -4,
-        sender: "sheeet",
-        subject: "Self mailing?",
-        content: "Best idea ever!",
-        time: new Date().getTime() - 2 * 1000 * 24 * 60 * 60,
-      }
-      */
-
-      ],
+      theirPublicKey64: null,
+      inbox: [],
     }
     this.textarea = React.createRef();
     this.profileCache = {};
@@ -68,7 +49,7 @@ export class MailApp extends React.Component {
   }
 
   async migrateFrom(version) {
-    if (version == 0) {
+    if (version === 0) {
       console.log("Migrating from version #0");
       const num = await this.props.app.get('numLetters');
       const allMigrations = [this.props.app.set('numLetters', num, { encrypted: true })];
@@ -83,6 +64,11 @@ export class MailApp extends React.Component {
         }).catch((e) => console.log("Can't migrate letter #", i, e)));
       }
       await Promise.all(allMigrations);
+      version++;
+    }
+    if (version === 1) {
+      console.log("Migrating from version #1");
+      await this.props.app.storeEncryptionPublicKey();
       version++;
     }
     await this.props.app.set('version', version, { encrypted: true });
@@ -122,10 +108,12 @@ export class MailApp extends React.Component {
         const values = await Promise.all([
           this.props.app.getFrom(accountId, 'displayName',  { appId: 'profile' }),
           this.props.app.getFrom(accountId, 'profileUrl', { appId: 'profile' }),
+          this.props.app.getFrom(accountId, encryptionKey),
         ]);
         this.profileCache[accountId] = {
           displayName: values[0] || "",
           profileUrl: values[1],
+          theirPublicKey64: values[2],
         };
       } catch (e) {
         this.profileCache[accountId] = false;
@@ -162,7 +150,7 @@ export class MailApp extends React.Component {
     this.setState(stateChange);
   }
 
-  fetchMessages() {
+  async fetchMessages() {
     if (!this.props.app) {
       return;
     }
@@ -171,46 +159,56 @@ export class MailApp extends React.Component {
       this.fetchTimeoutId = null;
     }
     console.log("Fetching messages");
-    this.props.app.pullMessage().then((message) => {
-      if (!message) {
-        this.fetchTimeoutId = setTimeout(() => { this.fetchMessages() }, 60 * 1000);
-        return;
+    const message = await this.props.app.pullMessage();
+    if (!message) {
+      this.fetchTimeoutId = setTimeout(() => { this.fetchMessages() }, 60 * 1000);
+      return;
+    }
+    try {
+      console.log(message);
+      let inner = JSON.parse(message.message);
+      const isEncrypted = inner.type === 'encrypted';
+      const fromAppId = inner.fromAppId || this.props.app.appId;
+      if (isEncrypted) {
+        const decryptedMessage = await this.props.app.decryptMessage(inner.content, {
+          accountId: message.sender,
+          appId: inner.fromAppId,
+        });
+        inner = JSON.parse(decryptedMessage);
       }
-      try {
-        console.log(message);
-        const inner = JSON.parse(message.message);
-        if (inner.type === 'mail') {
-          const letter = {
-            messageId: this.state.numLetters,
-            sender: message.sender,
-            subject: inner.subject,
-            content: inner.content,
-            time: Math.trunc(message.time / 1000000),
-          }
-          const newNumLetters = this.state.numLetters + 1;
-          this.setState({
-            numLetters: newNumLetters,
-          });
-
-          this.props.app.set("letter_" + letter.messageId, letter, {encrypted: true}).then(() => {
-            console.log("Saved the letter: ", letter);
-          });
-          this.props.app.set("numLetters", newNumLetters, {encrypted: true}).then(() => {
-              console.log("Saved the new number of letters: ", newNumLetters);
-          });
-          this.modifyLetter(letter);
-        } else {
-          console.warn("Unknown message", message);
+      if (inner.type === 'mail') {
+        const letter = {
+          messageId: this.state.numLetters,
+          isEncrypted,
+          fromAppId,
+          sender: message.sender,
+          subject: inner.subject,
+          content: inner.content,
+          time: Math.trunc(message.time / 1000000),
         }
-      } catch (e) {
-        console.error(e);
-      } finally {
-        this.fetchMessages()
+        const newNumLetters = this.state.numLetters + 1;
+        this.setState({
+          numLetters: newNumLetters,
+        });
+
+        this.props.app.set("letter_" + letter.messageId, letter, {encrypted: true}).then(() => {
+          console.log("Saved the letter: ", letter);
+        });
+        this.props.app.set("numLetters", newNumLetters, {encrypted: true}).then(() => {
+            console.log("Saved the new number of letters: ", newNumLetters);
+        });
+        this.modifyLetter(letter);
+      } else {
+        console.warn("Unknown message", message);
       }
-    })
+    } catch (e) {
+      console.error(e);
+    } finally {
+      this.fetchMessages()
+    }
   }
 
-  sendMail() {
+  async sendMail() {
     if (!this.state.profile) {
       return;
     }
@@ -218,22 +216,35 @@ export class MailApp extends React.Component {
     this.setState({
       sending: true,
     });
-    this.props.app.sendMessage(this.state.receiverId, JSON.stringify({
-      type: "mail",
-      subject: this.state.subject,
-      content: this.state.content,
-    })).then(() => {
+    try {
+      let message = JSON.stringify({
+        type: "mail",
+        subject: this.state.subject,
+        content: this.state.content,
+      });
+      if (this.state.profile.theirPublicKey64) {
+        const content = await this.props.app.encryptMessage(message, {
+          theirPublicKey64: this.state.profile.theirPublicKey64,
+        });
+        message = JSON.stringify({
+          type: "encrypted",
+          fromAppId: this.props.app.appId,
+          content,
+        })
+      }
+      await this.props.app.sendMessage(this.state.receiverId, message);
       this.setState({
         subject: "",
         content: "",
       })
-    }).finally(() => {
+    } catch (e) {
+      console.log("Failed to send the message", e);
+    } finally {
       this.setState({
         sending: false,
       });
       this.fetchMessages();
-    });
-
+    };
   }
 
   receiverClass() {
@@ -286,6 +297,10 @@ export class MailApp extends React.Component {
   }
 
   render() {
+    const encryptionEnabled = this.state.profile && this.state.profile.theirPublicKey64;
+    const encryptionIcon = this.state.profile &&
+      <img className="encryption-icon" src={encryptionEnabled ? encryptionOn : encryptionOff}
+          title={encryptionEnabled ? "Encryption is ON" : "Not secure! Encryption is OFF"}/>;
     const profile = this.state.profileLoading ? (
       <div className="col">
         <div className="spinner-grow" role="status">
@@ -337,7 +352,8 @@ export class MailApp extends React.Component {
           <textarea ref={this.textarea} id="content" className="form-control" rows="7" disabled={!this.props.app} value={this.state.content} onChange={(e) => this.handleChange('content', e.target.value)} />
         </div>
         <div className="form-group">
-          <button className="form-control form-control-lg btn btn-primary" disabled={!this.state.profile || this.state.sending} onClick={() => this.sendMail()}>Send</button>
+          <button className={"form-control form-control-lg btn " + (this.state.profile && !encryptionEnabled ? "btn-danger" : "btn-primary")} disabled={!this.state.profile || this.state.sending} onClick={() => this.sendMail()}>
+            Send {encryptionIcon}</button>
         </div>
       </div>
     )

@@ -3,6 +3,8 @@ import * as nacl from "tweetnacl";
 
 const GAS = 2_000_000_000_000_000;
 
+export const encryptionKey = "encryptionKey";
+
 /**
   a class representing the OpenWebApp API
 
@@ -77,7 +79,7 @@ export class OpenWebApp {
     produce a public key on the user account
     @return {string} existing (or create new) public key for the current account
    */
-  async getPublicKey() {
+  async getAccessPublicKey() {
     const key = await this._keyStore.getKey(this._networkId, this.accountId);
     if (key) {
       return key.getPublicKey();
@@ -88,6 +90,14 @@ export class OpenWebApp {
     const accessKey = nearlib.KeyPair.fromRandom('ed25519');
     this._tmpKey = accessKey;
     return accessKey.getPublicKey();
+  }
+
+  getEncryptionPublicKey() {
+    return Buffer.from(this._key.publicKey).toString('base64')
+  }
+
+  async storeEncryptionPublicKey() {
+    return this.set(encryptionKey, this.getEncryptionPublicKey());
   }
 
   /**
@@ -123,7 +133,7 @@ export class OpenWebApp {
   }
 
   /**
-    unbox encrypted messages
+    unbox encrypted messages with our secret key
     @param {string} msg64 encrypted message encoded as Base64
     @return {string} decoded contents of the box
    */
@@ -138,7 +148,7 @@ export class OpenWebApp {
   }
 
   /**
-    box an unencrypted message
+    box an unencrypted message with our secret key
     @param {string} str the message to wrap in a box
     @return {string} base64 encoded box of incoming message
    */
@@ -150,6 +160,45 @@ export class OpenWebApp {
     const fullBuf = new Uint8Array(box.length + nacl.secretbox.nonceLength);
     fullBuf.set(nonce);
     fullBuf.set(box, nacl.secretbox.nonceLength);
+    return Buffer.from(fullBuf).toString('base64')
+  }
+
+  /**
+   unbox encrypted messages with our secret key
+   @param {string} msg64 encrypted message encoded as Base64
+   @param {Uint8Array} theirPublicKey the public key to use to verify the message
+   @return {string} decoded contents of the box
+   */
+  decryptBox(msg64, theirPublicKey) {
+    if (theirPublicKey.length != nacl.box.publicKeyLength) {
+      throw new Error("Given encryption public key is invalid.");
+    }
+    const buf = Buffer.from(msg64, 'base64');
+    const nonce = new Uint8Array(nacl.box.nonceLength);
+    buf.copy(nonce, 0, 0, nonce.length);
+    const box = new Uint8Array(buf.length - nacl.box.nonceLength);
+    buf.copy(box, 0, nonce.length);
+    const decodedBuf = nacl.box.open(box, nonce, theirPublicKey, this._key.secretKey);
+    return Buffer.from(decodedBuf).toString()
+  }
+
+  /**
+   box an unencrypted message with their public key and sign it with our secret key
+   @param {string} str the message to wrap in a box
+   @param {Uint8Array} theirPublicKey the public key to use to encrypt the message
+   @returns {string} base64 encoded box of incoming message
+   */
+  encryptBox(str, theirPublicKey) {
+    if (theirPublicKey.length != nacl.box.publicKeyLength) {
+      throw new Error("Given encryption public key is invalid.");
+    }
+    const buf = Buffer.from(str);
+    const nonce = nacl.randomBytes(nacl.box.nonceLength);
+    const box = nacl.box(buf, nonce, theirPublicKey, this._key.secretKey);
+
+    const fullBuf = new Uint8Array(box.length + nacl.box.nonceLength);
+    fullBuf.set(nonce);
+    fullBuf.set(box, nacl.box.nonceLength);
     return Buffer.from(fullBuf).toString('base64')
   }
 
@@ -226,7 +275,7 @@ export class OpenWebApp {
       - {bool} `encrypted` flag indicating whether to encrypt (box) the value. Default false.
    */
   async set(key, value, options) {
-    this.forceReady();
+    await this.forceReady();
     options = Object.assign({
       encrypted: false,
     }, options);
@@ -242,7 +291,7 @@ export class OpenWebApp {
     @param {string} key key to be removed
    */
   async remove(key) {
-    this.forceReady();
+    await this.forceReady();
     await this.wrappedCall(() => this._contract.remove({
       key,
     }, GAS));
@@ -253,13 +302,64 @@ export class OpenWebApp {
 
     @return {any} return async? pull from local storage, null if not found
    */
-  async pullMessage() {
-    this.forceReady();
+  async pullMessage(options) {
+    await this.forceReady();
     if (await this._contract.num_messages({app_id: this.appId}) > 0) {
       return await this.wrappedCall(() => this._contract.pull_message({}, GAS));
     } else {
       return null;
     }
+  }
+
+  async getTheirPublicKey(options) {
+    await this.forceReady();
+    options = Object.assign({
+      accountId: null,
+      theirPublicKey: null,
+      theirPublicKey64: null,
+      encryptionKey,
+      appId: this.appId,
+    }, options);
+    if (options.theirPublicKey) {
+      return options.theirPublicKey;
+    }
+    if (!options.theirPublicKey64) {
+      if (!options.accountId) {
+        throw new Error("Either accountId or theirPublicKey64 has to be provided");
+      }
+      options.theirPublicKey64 = await this.getFrom(options.accountId, options.encryptionKey, {
+        appId: options.appId,
+      });
+    }
+    if (!options.theirPublicKey64) {
+      throw new Error("Their app doesn't provide the encryption public key.");
+    }
+    const buf = Buffer.from(options.theirPublicKey64, 'base64');
+    if (buf.length != nacl.box.publicKeyLength) {
+      throw new Error("Their encryption public key is invalid.");
+    }
+    const theirPublicKey = new Uint8Array(nacl.box.publicKeyLength);
+    theirPublicKey.set(buf);
+    return theirPublicKey;
+  }
+
+  /**
+   * Encrypts given content. Typical usage: encryptMessage("hello world", {accountId: bla})
+   *
+   * @param {string} content The message to encrypt
+   * @param options
+   * @returns {Promise<string>}
+   */
+  async encryptMessage(content, options) {
+    await this.forceReady();
+    const theirPublicKey = await this.getTheirPublicKey(options);
+    return this.encryptBox(content, theirPublicKey);
+  }
+
+  async decryptMessage(msg64, options) {
+    await this.forceReady();
+    const theirPublicKey = await this.getTheirPublicKey(options);
+    return this.decryptBox(msg64, theirPublicKey);
   }
 
   /**
@@ -268,13 +368,11 @@ export class OpenWebApp {
     @param {string} receiverId account id which will receive the message
     @param {string} message the content of the message
     @param {object} options to specify:
-      - {bool} `encrypted` flag indicating whether or not to encrypt the message with remote key. Default false.
       - {string} `appId` the app ID to receive the message. Same app by default.
    */
   async sendMessage(receiverId, message, options) {
     this.forceReady();
     options = Object.assign({
-      encrypted: false,  // not supported yet
       appId: this.appId,
     }, options);
     await this.wrappedCall(() => this._contract.send_message({

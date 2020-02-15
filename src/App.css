@@ -55,6 +55,11 @@
   border-radius: 50%;
 }
 
+.encryption-icon {
+  height: 2em;
+  width: 2em;
+}
+
 .profile-name {
   overflow-y: hidden;
   margin-left: 0.5em;

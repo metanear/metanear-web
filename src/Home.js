@@ -137,7 +137,7 @@ export class Home extends Component {
     const app = await new OpenWebApp(appId, accountId, window.nearConfig);
     await app.init();
     if (!await app.ready()) {
-      let pk = await app.getPublicKey();
+      let pk = await app.getAccessPublicKey();
       this.log("Authorizing app for key " + pk.toString() + " ...");
       const args = {
         public_key: [...nearlib.utils.serialize.serialize(nearlib.transactions.SCHEMA, pk)],
