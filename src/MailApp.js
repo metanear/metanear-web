@@ -101,24 +101,21 @@ export class MailApp extends React.Component {
 
   async fetchProfile(accountId) {
     if (accountId in this.profileCache) {
-      return this.profileCache[accountId];
+      return await this.profileCache[accountId];
     } else {
       console.log("Fetching profile for " + accountId);
-      try {
-        const values = await Promise.all([
-          this.props.app.getFrom(accountId, 'displayName',  { appId: 'profile' }),
-          this.props.app.getFrom(accountId, 'profileUrl', { appId: 'profile' }),
-          this.props.app.getFrom(accountId, encryptionKey),
-        ]);
-        this.profileCache[accountId] = {
+      this.profileCache[accountId] = Promise.all([
+        this.props.app.getFrom(accountId, 'displayName',  { appId: 'profile' }),
+        this.props.app.getFrom(accountId, 'profileUrl', { appId: 'profile' }),
+        this.props.app.getFrom(accountId, encryptionKey),
+      ]).then((values) => {
+        return {
           displayName: values[0] || "",
           profileUrl: values[1],
           theirPublicKey64: values[2],
         };
-      } catch (e) {
-        this.profileCache[accountId] = false;
-      }
-      return this.profileCache[accountId];
+      }).catch((e) => false);
+      return await this.profileCache[accountId];
     }
   }
 
