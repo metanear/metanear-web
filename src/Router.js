@@ -3,7 +3,7 @@ import {HashRouter, Route, Switch} from "react-router-dom";
 import { Home } from './Home';
 import { Auth } from './Auth';
 
-class App extends Component {
+class Router extends Component {
   render() {
     return (
       <HashRouter basename={process.env.PUBLIC_URL} hashType="noslash">
@@ -16,4 +16,4 @@ class App extends Component {
   }
 }
 
-export default App;
+export default Router;

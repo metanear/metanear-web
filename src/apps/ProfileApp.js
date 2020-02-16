@@ -1,5 +1,5 @@
 import React from "react";
-import anon from "./assets/anon.png";
+import anon from "../assets/anon.png";
 import Files from "react-files";
 
 const uploadResizeWidth = 96;

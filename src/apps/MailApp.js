@@ -1,8 +1,8 @@
 import React from "react";
-import anon from "./assets/anon.png";
-import encryptionOn from "./assets/encryptionOn.png";
-import encryptionOff from "./assets/encryptionOff.png";
-import {encryptionKey} from "./openweb";
+import anon from "../assets/anon.png";
+import encryptionOn from "../assets/encryptionOn.png";
+import encryptionOff from "../assets/encryptionOff.png";
+import {encryptionKey} from "../openweb/openweb";
 
 const RE = "Re: ";
 const currentVersion = 2;

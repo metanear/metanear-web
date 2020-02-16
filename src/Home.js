@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 import nearlogo from './assets/gray_near_logo.svg';
-import './App.css';
+import './css/App.css';
 import * as nearlib from "nearlib";
-import { OpenWebApp } from './openweb.js';
-import { ProfileApp } from "./ProfileApp";
-import { MailApp } from "./MailApp";
+import { OpenWebApp } from './openweb/openweb.js';
+import { ProfileApp } from "./apps/ProfileApp";
+import { MailApp } from "./apps/MailApp";
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
 

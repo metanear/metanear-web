@@ -312,7 +312,6 @@ export class OpenWebApp {
   }
 
   async getTheirPublicKey(options) {
-    await this.forceReady();
     options = Object.assign({
       accountId: null,
       theirPublicKey: null,
@@ -351,13 +350,11 @@ export class OpenWebApp {
    * @returns {Promise<string>}
    */
   async encryptMessage(content, options) {
-    await this.forceReady();
     const theirPublicKey = await this.getTheirPublicKey(options);
     return this.encryptBox(content, theirPublicKey);
   }
 
   async decryptMessage(msg64, options) {
-    await this.forceReady();
     const theirPublicKey = await this.getTheirPublicKey(options);
     return this.decryptBox(msg64, theirPublicKey);
   }
