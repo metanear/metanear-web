@@ -3,6 +3,7 @@ import anon from "../assets/anon.png";
 import encryptionOn from "../assets/encryptionOn.png";
 import encryptionOff from "../assets/encryptionOff.png";
 import {encryptionKey} from "../openweb/openweb";
+import {Profile} from "../components/profile/Profile";
 
 const RE = "Re: ";
 const currentVersion = 2;
@@ -298,18 +299,7 @@ export class MailApp extends React.Component {
     const encryptionIcon = this.state.profile &&
       <img className="encryption-icon" src={encryptionEnabled ? encryptionOn : encryptionOff}
           title={encryptionEnabled ? "Encryption is ON" : "Not secure! Encryption is OFF"}/>;
-    const profile = this.state.profileLoading ? (
-      <div className="col">
-        <div className="spinner-grow" role="status">
-          <span className="sr-only">Loading...</span>
-        </div>
-      </div>
-    ) : this.state.profile ? (
-      <div className="col">
-        <img className="profile-image" src={this.state.profile.profileUrl || anon}/>
-        <span className="profile-name">{this.state.profile.displayName}</span>
-      </div>
-    ) : null;
+    const profile = <Profile accountId={this.state.receiverId} />;
     const inbox = true || this.props.app ?
       this.state.inbox.map((letter, i) => <Letter
           key={letter.messageId}
@@ -381,16 +371,9 @@ export class Letter extends React.Component {
   }
 
   render() {
-    const profileName = (
-      <span className="letter-expanded-profile">
-        <span className="letter-profile-name">{this.state.profile.displayName}</span>
-        <span className="letter-account-id">{"(@" + this.props.letter.sender + ")"}</span>
-      </span>
-    )
     const profile = (
       <div className="col-sm-6 col-md-4 col-lg-4 letter-profile">
-        <img className="letter-profile-image" src={this.state.profile.profileUrl || anon}/>
-        {profileName}
+        <Profile accountId={this.props.letter.sender}/>
       </div>
     );
     const subject = (

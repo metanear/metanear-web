@@ -49,15 +49,19 @@
   height: 3em;
 }
 
+.encryption-icon {
+  height: 2em;
+  width: 2em;
+}
+
+.profile {
+  white-space: nowrap;
+}
+
 .profile-image {
   height: 3em;
   width: 3em;
   border-radius: 50%;
-}
-
-.encryption-icon {
-  height: 2em;
-  width: 2em;
 }
 
 .profile-name {
@@ -106,7 +110,7 @@
   overflow: hidden;
 }
 
-.letter-profile-image {
+.letter .profile-image {
   height: 2.7em;
   width: 2.7em;
   border-radius: 50%;
@@ -115,6 +119,10 @@
 .letter-profile-name {
   overflow: hidden;
   margin-left: 0.5em;
+}
+
+.profile-account-id {
+  color: #999;
 }
 
 .letter-account-id {

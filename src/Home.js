@@ -134,7 +134,7 @@ export class Home extends Component {
 
   async initOpenWebApp(appId, accountId) {
     this.log("Initializing app: " + appId + " ...");
-    const app = await new OpenWebApp(appId, accountId, window.nearConfig);
+    const app = new OpenWebApp(appId, accountId, window.nearConfig);
     await app.init();
     if (!await app.ready()) {
       let pk = await app.getAccessPublicKey();

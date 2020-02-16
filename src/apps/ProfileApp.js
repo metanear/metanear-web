@@ -1,6 +1,7 @@
 import React from "react";
 import anon from "../assets/anon.png";
 import Files from "react-files";
+import {Profile} from "../components/profile/Profile";
 
 const uploadResizeWidth = 96;
 const uploadResizeHeight = 96;
@@ -114,11 +115,7 @@ export class ProfileApp extends React.Component {
     return (
       <div>
         <div>
-          <img className="profile-image" src={this.state.profileUrl || anon}/>
-          <span className="letter-expanded-profile">
-            <span className="letter-profile-name">{this.state.displayName}</span>
-            {this.props.app && <span className="letter-account-id">{"(@" + this.props.app.accountId + ")"}</span>}
-          </span>
+          <Profile accountId={this.props.app && this.props.app.accountId} profileUrl={this.state.profileUrl} displayName={this.state.displayName} />
         </div>
         <hr/>
         <div>
