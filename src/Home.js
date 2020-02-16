@@ -5,6 +5,7 @@ import * as nearlib from "nearlib";
 import { OpenWebApp } from './openweb.js';
 import { ProfileApp } from "./ProfileApp";
 import { MailApp } from "./MailApp";
+import { ChatApp } from "./ChatApp";
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
 
@@ -18,7 +19,8 @@ export class Home extends Component {
       login: false,
       apps: {},
       logs: [],
-      unread: 0,
+      mailUnread: 0,
+      chatUnread: 0,
       loading: false,
     }
     this.signedInFlow = this.signedInFlow.bind(this);
@@ -121,7 +123,8 @@ export class Home extends Component {
     const apps = {
       profile: await this.initOpenWebApp('profile', accountId),
       graph: await this.initOpenWebApp('graph', accountId),
-      mail: await this.initOpenWebApp('mail', accountId)
+      mail: await this.initOpenWebApp('mail', accountId),
+      chat: await this.initOpenWebApp('chat', accountId),
     };
     window.apps = apps;
     this.apps = apps;
@@ -175,7 +178,7 @@ export class Home extends Component {
   }
 
   render() {
-    document.title = (this.state.unread ? `(${this.state.unread}) ` : "") + TITLE;
+    document.title = ((this.state.mailUnread + this.state.chatUnread) ? `(${this.state.mailUnread + this.state.chatUnread}) ` : "") + TITLE;
     return (
       <div className="App-header">
         <div className="image-wrapper">
@@ -202,14 +205,18 @@ export class Home extends Component {
             <Tabs forceRenderTabPanel={true}>
               <TabList>
                 <Tab>Profile</Tab>
-                <Tab>Mail {this.state.unread ? `(${this.state.unread})` : ""}</Tab>
+                <Tab>Mail {this.state.mailUnread ? `(${this.state.mailUnread})` : ""}</Tab>
+                <Tab>Chat {this.state.chatUnread ? `(${this.state.chatUnread})` : ""}</Tab>
               </TabList>
 
               <TabPanel>
                 <ProfileApp app={this.state.apps.profile}/>
               </TabPanel>
               <TabPanel>
-                <MailApp app={this.state.apps.mail} onNewMail={(unread) => this.setState({unread})}/>
+                <MailApp app={this.state.apps.mail} updateUnread={(mailUnread) => this.setState({mailUnread})}/>
+              </TabPanel>
+              <TabPanel>
+                <ChatApp app={this.state.apps.chat} updateUnread={(chatUnread) => this.setState({chatUnread})}/>
               </TabPanel>
             </Tabs>
           </div>
