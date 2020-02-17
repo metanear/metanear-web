@@ -7,6 +7,7 @@ import { ProfileApp } from "./apps/ProfileApp";
 import { MailApp } from "./apps/MailApp";
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
+import {Profile} from "./components/profile/Profile";
 
 const GAS = 2_000_000_000_000_000;
 const TITLE = "Open Web Home - NEAR"
@@ -176,46 +177,46 @@ export class Home extends Component {
 
   render() {
     document.title = (this.state.unread ? `(${this.state.unread}) ` : "") + TITLE;
-    return (
-      <div className="App-header">
-        <div className="image-wrapper">
-          <img className="logo" src={nearlogo} alt="NEAR logo" />
-        </div>
-        <h1>Hello{this.state.login ? ", " + this.state.accountId : "?"}</h1>
+    if (!this.state.login) {
+      return <div className="App-header">
         <div>
-          {this.state.login ? <button onClick={this.requestSignOut}>Log out</button>
-            : <button onClick={this.requestSignIn}>Log in with NEAR</button>}
+          <div className="image-wrapper">
+            <img className="logo" src={nearlogo} alt="NEAR logo"/>
+          </div>
+          <h1>Hello ?</h1>
+          <div>
+            <button onClick={this.requestSignIn}>Log in with NEAR</button>
+          </div>
         </div>
-        <br/>
+      </div>
+    } else {
+      return <div>
         {this.state.loading && (
           <div className="loading-div">
             <div className="spinner-grow loading-spinner" role="status">
               <span className="sr-only">Loading...</span>
             </div>
             <pre className="text-left">
-              {this.state.logs.join("\n")}
-            </pre>
+            {this.state.logs.join("\n")}
+          </pre>
           </div>
         )}
-        {this.state.login && (
-          <div className={"apps" + (this.state.loading ? " d-none" : "")}>
-            <Tabs forceRenderTabPanel={true}>
-              <TabList>
-                <Tab>Profile</Tab>
-                <Tab>Mail {this.state.unread ? `(${this.state.unread})` : ""}</Tab>
-              </TabList>
+        <div className={"apps" + (this.state.loading ? " d-none" : "")}>
+          <Tabs forceRenderTabPanel={true}>
+            <TabList>
+              <Tab>Profile</Tab>
+              <Tab>Mail {this.state.unread ? `(${this.state.unread})` : ""}</Tab>
+            </TabList>
 
-              <TabPanel>
-                <ProfileApp app={this.state.apps.profile}/>
-              </TabPanel>
-              <TabPanel>
-                <MailApp app={this.state.apps.mail} onNewMail={(unread) => this.setState({unread})}/>
-              </TabPanel>
-            </Tabs>
-          </div>
-        )}
+            <TabPanel>
+              <ProfileApp app={this.state.apps.profile} logOut={this.requestSignOut}/>
+            </TabPanel>
+            <TabPanel>
+              <MailApp app={this.state.apps.mail} onNewMail={(unread) => this.setState({unread})}/>
+            </TabPanel>
+          </Tabs>
+        </div>
       </div>
-    )
+    }
   }
-
 }

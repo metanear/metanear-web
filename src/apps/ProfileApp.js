@@ -115,7 +115,13 @@ export class ProfileApp extends React.Component {
     return (
       <div>
         <div>
-          <Profile accountId={this.props.app && this.props.app.accountId} profileUrl={this.state.profileUrl} displayName={this.state.displayName} />
+          <button className="float-right" onClick={this.props.logOut}>Log out</button>
+          <Profile
+            accountId={this.props.app && this.props.app.accountId}
+            profileUrl={this.state.profileUrl}
+            displayName={this.state.displayName}
+            bio={this.state.bio}
+          />
         </div>
         <hr/>
         <div>

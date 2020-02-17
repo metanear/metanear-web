@@ -10,6 +10,7 @@
         "near-shell": "^0.20.1",
         "nearlib": "^0.21.0",
         "react": "^16.11.0",
+        "react-bootstrap": "^1.0.0-beta.16",
         "react-dom": "^16.11.0",
         "react-files": "^2.4.8",
         "react-router-dom": "^5.1.2",

@@ -1,6 +1,8 @@
 import React from "react";
 import anon from "../../assets/anon.png";
 import {OpenWebApp} from "../../openweb/openweb";
+import Popover from "react-bootstrap/Popover";
+import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 
 const profileAppId = "profile";
 
@@ -10,6 +12,7 @@ export class Profile extends React.Component {
     this.state = {
       displayName: "",
       profileUrl: null,
+      bio: "",
       loading: true,
       found: false,
     }
@@ -23,7 +26,10 @@ export class Profile extends React.Component {
 
     this.profileCache = window.profileComponentCache.profileCache;
     this.app = window.profileComponentCache.app;
-    this.updateProfile(this.props.accountId);
+  }
+
+  componentDidMount() {
+    this.app.ready().then(() => this.updateProfile(this.props.accountId));
   }
 
   async fetchProfile(accountId) {
@@ -34,10 +40,12 @@ export class Profile extends React.Component {
       this.profileCache[accountId] = Promise.all([
         this.app.getFrom(accountId, 'displayName'),
         this.app.getFrom(accountId, 'profileUrl'),
+        this.app.getFrom(accountId, 'bio'),
       ]).then((values) => {
         return {
           displayName: values[0] || "",
           profileUrl: values[1],
+          bio: values[2] || "",
           loading: false,
         };
       }).catch((e) => false);
@@ -49,6 +57,7 @@ export class Profile extends React.Component {
     this.setState({
       displayName: "",
       profileUrl: null,
+      bio: "",
       loading: true,
       found: false,
     });
@@ -57,6 +66,7 @@ export class Profile extends React.Component {
         this.setState({
           displayName: profile.displayName,
           profileUrl: profile.profileUrl,
+          bio: profile.bio,
           loading: false,
           found: true,
         });
@@ -84,13 +94,42 @@ export class Profile extends React.Component {
         </div>
       </div>
     ) : this.state.found ? (
-      <div className="profile">
-        <img className="profile-image" src={this.props.profileUrl || this.state.profileUrl || anon}/>
-        <span className="profile-name">
-          <span className="profile-display-name">{this.props.displayName || this.state.displayName}</span>
-          <span className="profile-account-id">{"(@" + this.props.accountId + ")"}</span>
-        </span>
-      </div>
+      <OverlayTrigger
+        placement="auto"
+        delay={{ show: 250, hide: 400 }}
+
+        overlay={<ProfilePopover
+          displayName={this.props.displayName || this.state.displayName}
+          profileUrl={this.props.profileUrl || this.state.profileUrl}
+          bio={this.props.bio || this.state.bio}
+          accountId={this.props.accountId}
+        />}
+      >
+        <div className="profile">
+          <img className="profile-image" src={this.props.profileUrl || this.state.profileUrl || anon} alt={`Profile picture of @${this.props.accountId}`}/>
+          <span className="profile-name">
+            <span className="profile-display-name">{this.props.displayName || this.state.displayName}</span>
+            <span className="profile-account-id">{"(@" + this.props.accountId + ")"}</span>
+          </span>
+        </div>
+      </OverlayTrigger>
     ) : null;
+  }
+}
+
+class ProfilePopover extends React.Component {
+  render() {
+    return <Popover id="popover-basic" {...this.props}>
+      <Popover.Title as="h3">{this.props.displayName}</Popover.Title>
+      <Popover.Content>
+        <div>
+          <img className="profile-image" src={this.props.profileUrl || anon} alt={`Profile picture of @${this.props.accountId}`}/>
+          <span className="profile-account-id">{"@" + this.props.accountId}</span>
+        </div>
+        <div>
+          {this.props.bio}
+        </div>
+      </Popover.Content>
+    </Popover>;
   }
 }

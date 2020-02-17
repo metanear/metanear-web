@@ -1,5 +1,4 @@
 import React from "react";
-import anon from "../assets/anon.png";
 import encryptionOn from "../assets/encryptionOn.png";
 import encryptionOff from "../assets/encryptionOff.png";
 import {encryptionKey} from "../openweb/openweb";
@@ -36,7 +35,7 @@ export class MailApp extends React.Component {
       }
       messageId = letter.messageId;
     }
-    const inbox = this.state.inbox.filter((a) => a.messageId != messageId);
+    const inbox = this.state.inbox.filter((a) => a.messageId !== messageId);
     if (letter) {
       inbox.push(letter);
     }
@@ -52,8 +51,13 @@ export class MailApp extends React.Component {
   async migrateFrom(version) {
     if (version === 0) {
       console.log("Migrating from version #0");
-      const num = await this.props.app.get('numLetters');
-      const allMigrations = [this.props.app.set('numLetters', num, { encrypted: true })];
+      let num = 0;
+      try {
+        num = await this.props.app.get('numLetters');
+      } catch (e) {
+        // whatever. Probably died during migration.
+      }
+      const allMigrations = [];
       for (let i = 0; i < num; ++i) {
         allMigrations.push(this.props.app.get('letter_' + i).then((letter) => {
           if (letter) {
@@ -65,6 +69,7 @@ export class MailApp extends React.Component {
         }).catch((e) => console.log("Can't migrate letter #", i, e)));
       }
       await Promise.all(allMigrations);
+      await this.props.app.set('numLetters', num, { encrypted: true });
       version++;
     }
     if (version === 1) {
@@ -125,7 +130,7 @@ export class MailApp extends React.Component {
       [key]: value,
     };
     if (key === 'receiverId') {
-      value = value.toLowerCase().replace(/[^a-z0-9\-\_\.]/, '');
+      value = value.toLowerCase().replace(/[^a-z0-9\-_.]/, '');
       stateChange[key] = value;
       const profileFetchIndex = this.state.profileFetchIndex + 1;
       stateChange.profileFetchIndex = profileFetchIndex;
@@ -305,7 +310,7 @@ export class MailApp extends React.Component {
           key={letter.messageId}
           fetchProfile={(a) => this.fetchProfile(a)}
           letter={letter}
-          expanded={letter.messageId == this.state.expandedId}
+          expanded={letter.messageId === this.state.expandedId}
           deleteLetter={(letter) => this.deleteLetter(letter)}
           replyTo={(letter, displayName) => this.replyTo(letter, displayName)}
           selectLetter={(letter) => this.selectLetter(letter)}/>) :

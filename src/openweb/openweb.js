@@ -45,15 +45,7 @@ export class OpenWebApp {
     this._key = key;
   }
 
-  /**
-    initialize the client-side application with a BrowserLocalStorageKeyStore
-    and a connection to the NEAR platform, binding OpenWebContract methods:
-
-    - get, set, remove: local invocation methods for controlling the state of local applications
-    - pull_message, send_message: remote invocation methods for communicating with contracts of other users
-    - apps, num_messages: convenience methods for listing all apps on the OpenWeb and messages for a specific app
-   */
-  async init() {
+  async _innerInit() {
     this._keyStore = new nearlib.keyStores.BrowserLocalStorageKeyStore(
       localStorage, "app:" + this.appId,
     );
@@ -65,14 +57,26 @@ export class OpenWebApp {
       sender: this.accountId
     });
     this._networkId = this._config.networkId;
+    return true;
+  }
+
+  /**
+    initialize the client-side application with a BrowserLocalStorageKeyStore
+    and a connection to the NEAR platform, binding OpenWebContract methods:
+
+    - get, set, remove: local invocation methods for controlling the state of local applications
+    - pull_message, send_message: remote invocation methods for communicating with contracts of other users
+    - apps, num_messages: convenience methods for listing all apps on the OpenWeb and messages for a specific app
+   */
+  async init() {
+    return this._ready || (this._ready = this._innerInit());
   }
 
   /**
     helper method to check if the user is logged in with the app
    */
   async ready() {
-    const key = await this._keyStore.getKey(this._networkId, this.accountId);
-    return !!key;
+    return this.init();
   }
 
   /**
@@ -170,7 +174,7 @@ export class OpenWebApp {
    @return {string} decoded contents of the box
    */
   decryptBox(msg64, theirPublicKey) {
-    if (theirPublicKey.length != nacl.box.publicKeyLength) {
+    if (theirPublicKey.length !== nacl.box.publicKeyLength) {
       throw new Error("Given encryption public key is invalid.");
     }
     const buf = Buffer.from(msg64, 'base64');
@@ -189,7 +193,7 @@ export class OpenWebApp {
    @returns {string} base64 encoded box of incoming message
    */
   encryptBox(str, theirPublicKey) {
-    if (theirPublicKey.length != nacl.box.publicKeyLength) {
+    if (theirPublicKey.length !== nacl.box.publicKeyLength) {
       throw new Error("Given encryption public key is invalid.");
     }
     const buf = Buffer.from(str);
@@ -334,7 +338,7 @@ export class OpenWebApp {
       throw new Error("Their app doesn't provide the encryption public key.");
     }
     const buf = Buffer.from(options.theirPublicKey64, 'base64');
-    if (buf.length != nacl.box.publicKeyLength) {
+    if (buf.length !== nacl.box.publicKeyLength) {
       throw new Error("Their encryption public key is invalid.");
     }
     const theirPublicKey = new Uint8Array(nacl.box.publicKeyLength);
