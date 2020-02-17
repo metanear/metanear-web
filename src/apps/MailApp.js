@@ -16,16 +16,17 @@ export class MailApp extends React.Component {
       subject: "",
       content: "",
       sending: false,
-      profileFetchTimeoutId: null,
-      profileFetchIndex: 0,
       numLetters: 0,
       unread: 0,
       expandedId: -1,
+      profileFound: false,
+      profileLoading: false,
+      keyLoading: false,
       theirPublicKey64: null,
       inbox: [],
     }
     this.textarea = React.createRef();
-    this.profileCache = {};
+    this.keyCache = {};
   }
 
   modifyLetter(letter, messageId) {
@@ -81,7 +82,6 @@ export class MailApp extends React.Component {
   }
 
   async init() {
-    console.log("init");
     this.setState({
       initialized: true,
     });
@@ -105,24 +105,36 @@ export class MailApp extends React.Component {
     }
   }
 
-  async fetchProfile(accountId) {
-    if (accountId in this.profileCache) {
-      return await this.profileCache[accountId];
+  async fetchKey(accountId) {
+    if (accountId in this.keyCache) {
+      return await this.keyCache[accountId];
     } else {
-      console.log("Fetching profile for " + accountId);
-      this.profileCache[accountId] = Promise.all([
-        this.props.app.getFrom(accountId, 'displayName',  { appId: 'profile' }),
-        this.props.app.getFrom(accountId, 'profileUrl', { appId: 'profile' }),
-        this.props.app.getFrom(accountId, encryptionKey),
-      ]).then((values) => {
-        return {
-          displayName: values[0] || "",
-          profileUrl: values[1],
-          theirPublicKey64: values[2],
-        };
-      }).catch((e) => false);
-      return await this.profileCache[accountId];
+      console.log("Fetching key for " + accountId);
+      this.keyCache[accountId] = this.props.app.getFrom(accountId, encryptionKey).catch((e) => false);
+      return await this.keyCache[accountId];
     }
+  }
+
+  updateKey(profile) {
+    if (!this.props.app) {
+      return;
+    }
+    this.setState({
+      profileLoading: false,
+      profileFound: !!profile,
+    });
+    if (!profile) {
+      return;
+    }
+    this.setState({
+      keyLoading: true,
+    })
+    this.fetchKey(profile.accountId).then((theirPublicKey64) => {
+      this.setState({
+        keyLoading: false,
+        theirPublicKey64,
+      })
+    });
   }
 
   handleChange(key, value) {
@@ -132,23 +144,8 @@ export class MailApp extends React.Component {
     if (key === 'receiverId') {
       value = value.toLowerCase().replace(/[^a-z0-9\-_.]/, '');
       stateChange[key] = value;
-      const profileFetchIndex = this.state.profileFetchIndex + 1;
-      stateChange.profileFetchIndex = profileFetchIndex;
-      stateChange.profile = null;
-      if (value) {
-        stateChange.profileLoading = true;
-        this.fetchProfile(value).then((profile) => {
-          if (this.state.profileFetchIndex !== profileFetchIndex) {
-            return;
-          }
-          this.setState({
-            profileLoading: false,
-            profile,
-          });
-        });
-      } else {
-        stateChange.profileLoading = false;
-      }
+      stateChange.profileLoading = true;
+      stateChange.theirPublicKey64 = false;
     }
     this.setState(stateChange);
   }
@@ -212,7 +209,7 @@ export class MailApp extends React.Component {
   }
 
   async sendMail() {
-    if (!this.state.profile) {
+    if (!this.state.profileFound) {
       return;
     }
     console.log("Sending mail");
@@ -225,9 +222,9 @@ export class MailApp extends React.Component {
         subject: this.state.subject,
         content: this.state.content,
       });
-      if (this.state.profile.theirPublicKey64) {
+      if (this.state.theirPublicKey64) {
         const content = await this.props.app.encryptMessage(message, {
-          theirPublicKey64: this.state.profile.theirPublicKey64,
+          theirPublicKey64: this.state.theirPublicKey64,
         });
         message = JSON.stringify({
           type: "encrypted",
@@ -253,7 +250,7 @@ export class MailApp extends React.Component {
   receiverClass() {
     if (!this.state.receiverId || this.state.profileLoading) {
       return "form-control";
-    } else if (this.state.profile) {
+    } else if (this.state.profileFound) {
       return "form-control is-valid";
     } else {
       return "form-control is-invalid";
@@ -300,24 +297,25 @@ export class MailApp extends React.Component {
   }
 
   render() {
-    const encryptionEnabled = this.state.profile && this.state.profile.theirPublicKey64;
-    const encryptionIcon = this.state.profile &&
+    const encryptionEnabled = this.state.theirPublicKey64;
+    const displayEncryptionIcon = this.state.profileFound && !this.state.keyLoading;
+    const encryptionAlt = encryptionEnabled ? "Encryption is ON" : "Not secure! Encryption is OFF";
+    const encryptionIcon = displayEncryptionIcon &&
       <img className="encryption-icon" src={encryptionEnabled ? encryptionOn : encryptionOff}
-          title={encryptionEnabled ? "Encryption is ON" : "Not secure! Encryption is OFF"}/>;
-    const profile = <Profile accountId={this.state.receiverId} />;
-    const inbox = true || this.props.app ?
-      this.state.inbox.map((letter, i) => <Letter
-          key={letter.messageId}
-          fetchProfile={(a) => this.fetchProfile(a)}
-          letter={letter}
-          expanded={letter.messageId === this.state.expandedId}
-          deleteLetter={(letter) => this.deleteLetter(letter)}
-          replyTo={(letter, displayName) => this.replyTo(letter, displayName)}
-          selectLetter={(letter) => this.selectLetter(letter)}/>) :
-      null;
+          title={encryptionAlt} alt={encryptionAlt}/>;
+    const profile = <Profile accountId={this.state.receiverId} onFetch={(profile) => this.updateKey(profile)} />;
+    const inbox = this.state.inbox.map((letter, i) => (
+      <Letter
+        key={letter.messageId}
+        letter={letter}
+        expanded={letter.messageId === this.state.expandedId}
+        deleteLetter={(letter) => this.deleteLetter(letter)}
+        replyTo={(letter, displayName) => this.replyTo(letter, displayName)}
+        selectLetter={(letter) => this.selectLetter(letter)} />
+    ));
     return (
       <div>
-        Inbox <button className="btn btn-sm" onClick={() => this.fetchMessages()}>🔄</button>
+        Inbox <button className="btn btn-sm" onClick={() => this.fetchMessages()}><span role="img" aria-label="Refresh">🔄</span></button>
         <div>
           {inbox}
         </div>
@@ -344,7 +342,7 @@ export class MailApp extends React.Component {
           <textarea ref={this.textarea} id="content" className="form-control" rows="7" disabled={!this.props.app} value={this.state.content} onChange={(e) => this.handleChange('content', e.target.value)} />
         </div>
         <div className="form-group">
-          <button className={"form-control form-control-lg btn " + (this.state.profile && !encryptionEnabled ? "btn-danger" : "btn-primary")} disabled={!this.state.profile || this.state.sending} onClick={() => this.sendMail()}>
+          <button className={"form-control form-control-lg btn " + (displayEncryptionIcon && !encryptionEnabled ? "btn-danger" : "btn-primary")} disabled={!this.state.profile || this.state.sending} onClick={() => this.sendMail()}>
             Send {encryptionIcon}</button>
         </div>
       </div>
@@ -363,14 +361,6 @@ export class Letter extends React.Component {
     };
   }
 
-  componentDidMount() {
-    this.props.fetchProfile(this.props.letter.sender).then((profile) => {
-      this.setState({
-        profile,
-      })
-    });
-  }
-
   onClick() {
     this.props.selectLetter(this.props.letter);
   }
@@ -378,7 +368,7 @@ export class Letter extends React.Component {
   render() {
     const profile = (
       <div className="col-sm-6 col-md-4 col-lg-4 letter-profile">
-        <Profile accountId={this.props.letter.sender}/>
+        <Profile accountId={this.props.letter.sender} onFetch={(profile) => profile && this.setState({displayName: profile.displayName})}/>
       </div>
     );
     const subject = (
@@ -407,7 +397,7 @@ export class Letter extends React.Component {
             <pre>{this.props.letter.content}</pre>
             <div className="row">
               <div className="col-sm">
-                <button className="btn btn-primary" onClick={() => this.props.replyTo(this.props.letter, this.state.profile.displayName)}>Reply</button>
+                <button className="btn btn-primary" onClick={() => this.props.replyTo(this.props.letter, this.state.displayName)}>Reply</button>
               </div>
               <div className="col-sm">
                 <button className="btn btn-danger float-right" onClick={() => this.props.deleteLetter(this.props.letter)}>DELETE THIS!</button>

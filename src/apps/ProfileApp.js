@@ -27,12 +27,10 @@ export class ProfileApp extends React.Component {
   }
 
   async init() {
-    console.log("init profile");
     this.setState({
       initialized: true,
     });
     const values = await Promise.all(this.state.keys.map((key) => this.props.app.get(key)));
-    console.log(values);
     const chainValues = this.state.keys.reduce((acc, key, i) => {
       acc[key] = values[i] || "";
       return acc;

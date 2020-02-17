@@ -13,7 +13,7 @@ export class Profile extends React.Component {
       displayName: "",
       profileUrl: null,
       bio: "",
-      loading: true,
+      loading: false,
       found: false,
     }
     if (!window.profileComponentCache) {
@@ -29,7 +29,7 @@ export class Profile extends React.Component {
   }
 
   componentDidMount() {
-    this.app.ready().then(() => this.updateProfile(this.props.accountId));
+    this.props.accountId && this.app.ready().then(() => this.updateProfile(this.props.accountId));
   }
 
   async fetchProfile(accountId) {
@@ -43,10 +43,10 @@ export class Profile extends React.Component {
         this.app.getFrom(accountId, 'bio'),
       ]).then((values) => {
         return {
+          accountId,
           displayName: values[0] || "",
           profileUrl: values[1],
           bio: values[2] || "",
-          loading: false,
         };
       }).catch((e) => false);
       return await this.profileCache[accountId];
@@ -76,6 +76,7 @@ export class Profile extends React.Component {
           found: false,
         });
       }
+      this.props.onFetch && this.props.onFetch(profile);
     })
 
   }
@@ -87,6 +88,21 @@ export class Profile extends React.Component {
   }
 
   render() {
+    const displayName = this.props.displayName || this.state.displayName;
+    const profileUrl = this.props.profileUrl || this.state.profileUrl || anon;
+    const bio = this.props.bio || this.state.bio;
+    const popover = <Popover className="profile-popover" id={"profile-popover-" + this.props.accountId}>
+      <Popover.Title as="h3">{displayName}</Popover.Title>
+      <Popover.Content>
+        <div>
+          <img className="profile-image" src={profileUrl} alt={`Profile @${this.props.accountId}`}/>
+          <span className="profile-account-id">{"@" + this.props.accountId}</span>
+        </div>
+        <div>
+          {bio}
+        </div>
+      </Popover.Content>
+    </Popover>;
     return this.state.loading ? (
       <div className="profile">
         <div className="spinner-grow" role="status">
@@ -96,40 +112,17 @@ export class Profile extends React.Component {
     ) : this.state.found ? (
       <OverlayTrigger
         placement="auto"
-        delay={{ show: 250, hide: 400 }}
-
-        overlay={<ProfilePopover
-          displayName={this.props.displayName || this.state.displayName}
-          profileUrl={this.props.profileUrl || this.state.profileUrl}
-          bio={this.props.bio || this.state.bio}
-          accountId={this.props.accountId}
-        />}
+        delay={{ show: 250, hide: 100 }}
+        overlay={popover}
       >
         <div className="profile">
-          <img className="profile-image" src={this.props.profileUrl || this.state.profileUrl || anon} alt={`Profile picture of @${this.props.accountId}`}/>
+          <img className="profile-image" src={profileUrl} alt={`Profile @${this.props.accountId}`}/>
           <span className="profile-name">
-            <span className="profile-display-name">{this.props.displayName || this.state.displayName}</span>
+            <span className="profile-display-name">{displayName}</span>
             <span className="profile-account-id">{"(@" + this.props.accountId + ")"}</span>
           </span>
         </div>
       </OverlayTrigger>
     ) : null;
-  }
-}
-
-class ProfilePopover extends React.Component {
-  render() {
-    return <Popover id="popover-basic" {...this.props}>
-      <Popover.Title as="h3">{this.props.displayName}</Popover.Title>
-      <Popover.Content>
-        <div>
-          <img className="profile-image" src={this.props.profileUrl || anon} alt={`Profile picture of @${this.props.accountId}`}/>
-          <span className="profile-account-id">{"@" + this.props.accountId}</span>
-        </div>
-        <div>
-          {this.props.bio}
-        </div>
-      </Popover.Content>
-    </Popover>;
   }
 }

@@ -7,7 +7,6 @@ import { ProfileApp } from "./apps/ProfileApp";
 import { MailApp } from "./apps/MailApp";
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
-import {Profile} from "./components/profile/Profile";
 
 const GAS = 2_000_000_000_000_000;
 const TITLE = "Open Web Home - NEAR"
@@ -52,7 +51,6 @@ export class Home extends Component {
   }
 
   async signedInFlow() {
-    console.log("come in sign in flow")
     const accountId = await this.props.wallet.getAccountId()
     this.setState({
       login: true,
@@ -130,7 +128,6 @@ export class Home extends Component {
       apps,
       loading: false,
     })
-    console.log(apps);
   }
 
   async initOpenWebApp(appId, accountId) {
@@ -147,7 +144,6 @@ export class Home extends Component {
       await this.masterContract.add_app_key(args, GAS);
       await app.onKeyAdded();
     }
-    this.log("Done");
     return app;
   }
 

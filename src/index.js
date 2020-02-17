@@ -7,7 +7,6 @@ import * as nearlib from 'nearlib';
 // Initializing contract
 async function InitContract() {
     window.nearConfig = getConfig('development')
-    console.log("nearConfig", window.nearConfig);
 
     // Initializing connection to the NEAR DevNet.
     window.near = await nearlib.connect(Object.assign({ deps: { keyStore: new nearlib.keyStores.BrowserLocalStorageKeyStore() } }, window.nearConfig));
