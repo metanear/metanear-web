@@ -1,13 +1,12 @@
 import React from "react";
 import anon from "../assets/anon.png";
 import Files from "react-files";
-import {Profile} from "../components/profile/Profile";
+import { Profile } from "react-near-openweb";
 
 const uploadResizeWidth = 96;
 const uploadResizeHeight = 96;
 
 export class ProfileApp extends React.Component {
-
   constructor(props) {
     super(props);
     const keys = [
@@ -119,6 +118,7 @@ export class ProfileApp extends React.Component {
             profileUrl={this.state.profileUrl}
             displayName={this.state.displayName}
             bio={this.state.bio}
+            defaultProfileUrl={anon}
           />
         </div>
         <hr/>

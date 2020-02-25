@@ -1,8 +1,9 @@
 import React from "react";
+import anon from "../assets/anon.png";
 import encryptionOn from "../assets/encryptionOn.png";
 import encryptionOff from "../assets/encryptionOff.png";
-import {encryptionKey} from "../openweb/openweb";
-import {Profile} from "../components/profile/Profile";
+import { encryptionKey } from "near-openweb-js";
+import { Profile } from "react-near-openweb";
 
 const RE = "Re: ";
 const currentVersion = 2;
@@ -303,7 +304,7 @@ export class MailApp extends React.Component {
     const encryptionIcon = displayEncryptionIcon &&
       <img className="encryption-icon" src={encryptionEnabled ? encryptionOn : encryptionOff}
           title={encryptionAlt} alt={encryptionAlt}/>;
-    const profile = <Profile accountId={this.state.receiverId} onFetch={(profile) => this.updateKey(profile)} />;
+    const profile = <Profile accountId={this.state.receiverId} onFetch={(profile) => this.updateKey(profile)} defaultProfileUrl={anon}/>;
     const inbox = this.state.inbox.map((letter, i) => (
       <Letter
         key={letter.messageId}
@@ -368,7 +369,7 @@ export class Letter extends React.Component {
   render() {
     const profile = (
       <div className="col-sm-6 col-md-4 col-lg-4 letter-profile">
-        <Profile accountId={this.props.letter.sender} onFetch={(profile) => profile && this.setState({displayName: profile.displayName})}/>
+        <Profile accountId={this.props.letter.sender} onFetch={(profile) => profile && this.setState({displayName: profile.displayName})} defaultProfileUrl={anon}/>
       </div>
     );
     const subject = (

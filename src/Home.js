@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import nearlogo from './assets/gray_near_logo.svg';
 import './css/App.css';
 import * as nearlib from "nearlib";
-import { OpenWebApp } from './openweb/openweb.js';
+import { OpenWebApp } from 'near-openweb-js';
 import { ProfileApp } from "./apps/ProfileApp";
 import { MailApp } from "./apps/MailApp";
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
@@ -115,7 +115,7 @@ export class Home extends Component {
     console.log("Apps:", await masterContract.apps());
 
     // this.initOpenWebApp = this.initOpenWebApp.bind(this);
-    
+
     this.log("Initializing local apps...");
     const apps = {
       profile: await this.initOpenWebApp('profile', accountId),
