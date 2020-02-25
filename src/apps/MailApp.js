@@ -342,7 +342,7 @@ export class MailApp extends React.Component {
           <textarea ref={this.textarea} id="content" className="form-control" rows="7" disabled={!this.props.app} value={this.state.content} onChange={(e) => this.handleChange('content', e.target.value)} />
         </div>
         <div className="form-group">
-          <button className={"form-control form-control-lg btn " + (displayEncryptionIcon && !encryptionEnabled ? "btn-danger" : "btn-primary")} disabled={!this.state.profile || this.state.sending} onClick={() => this.sendMail()}>
+          <button className={"form-control form-control-lg btn " + (displayEncryptionIcon && !encryptionEnabled ? "btn-danger" : "btn-primary")} disabled={!this.state.profileFound || this.state.sending} onClick={() => this.sendMail()}>
             Send {encryptionIcon}</button>
         </div>
       </div>
