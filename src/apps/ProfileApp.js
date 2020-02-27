@@ -22,48 +22,78 @@ export class ProfileApp extends React.Component {
       keys,
       chainValues: {},
       initialized: false,
+      saving: false,
+      hasChanges: false,
+      appReady: false,
     });
   }
 
-  async init() {
-    this.setState({
-      initialized: true,
+  async init(profile) {
+    if (!profile) {
+      return;
+    }
+    const newState = this.state.keys.reduce((state, key) => {
+      state[key] = profile[key] || "";
+      state.chainValues[key] = state[key];
+      return state;
+    }, {
+      chainValues: {}
     });
-    const values = await Promise.all(this.state.keys.map((key) => this.props.app.get(key)));
-    const chainValues = this.state.keys.reduce((acc, key, i) => {
-      acc[key] = values[i] || "";
-      return acc;
-    }, {});
-    this.setState(Object.assign({chainValues}, chainValues));
+    this.setState(newState);
   }
 
-  componentDidUpdate(prevProps) {
+  maybeInit() {
     if (this.props.app && !this.state.initialized) {
-      this.init();
+      this.setState({
+        initialized: true,
+      });
+      this.props.app.waitReady().then(() => {
+        this.setState({
+          appReady: true,
+        })
+      })
     }
   }
 
+  componentDidMount() {
+    this.maybeInit()
+  }
+
+  componentDidUpdate(prevProps) {
+    this.maybeInit()
+  }
+
   handleChange(key, value) {
-    console.log(value.length);
     this.setState({
       [key]: value,
     });
   }
 
+  hasChanges() {
+    return this.state.keys.some(key => this.state.chainValues[key] !== this.state[key]);
+  }
+
   async save() {
+    this.setState({
+      saving: true,
+    });
     console.log("Saving");
     const chainValues = Object.assign({}, this.state.chainValues);
+    const promises = [];
     this.state.keys.forEach(key => {
       if (this.state.chainValues[key] !== this.state[key]) {
         chainValues[key] = this.state[key];
-        this.props.app.set(key, this.state[key]).then(() => {
+        promises.push(this.props.app.set(key, this.state[key]).then(() => {
           console.log("Updated key `" + key + "` to value `" + this.state[key] + '`');
-        });
+        }));
       }
     });
-    this.setState({
-      chainValues
-    })
+    Promise.all(promises).then(() => {
+      this.setState({
+        chainValues,
+        saving: false,
+      })
+    });
   }
 
   async onFilesChange(f) {
@@ -119,6 +149,7 @@ export class ProfileApp extends React.Component {
             displayName={this.state.displayName}
             bio={this.state.bio}
             defaultProfileUrl={anon}
+            onFetch={(profile) => this.init(profile)}
           />
         </div>
         <hr/>
@@ -152,7 +183,15 @@ export class ProfileApp extends React.Component {
             <textarea placeholder="I'm working on Bitcoin, so bankers can go home." id="bio" className="form-control" disabled={!this.props.app} value={this.state.bio} onChange={(e) => this.handleChange('bio', e.target.value)} />
           </div>
           <div className="form-group">
-            <button onClick={() => this.save()}>Save changes</button>
+            <button
+                className="btn btn-primary"
+                disabled={this.state.saving || !this.hasChanges()}
+                onClick={() => this.save()}
+            >
+              {this.state.saving && (
+                  <span className="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+              )} Save changes
+            </button>
           </div>
         </div>
       </div>

@@ -5,6 +5,7 @@ import * as nearlib from "nearlib";
 import { OpenWebApp } from 'near-openweb-js';
 import { ProfileApp } from "./apps/ProfileApp";
 import { MailApp } from "./apps/MailApp";
+// import { KeysApp } from "./apps/KeysApp";
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
 
@@ -119,8 +120,9 @@ export class Home extends Component {
     this.log("Initializing local apps...");
     const apps = {
       profile: await this.initOpenWebApp('profile', accountId),
-      graph: await this.initOpenWebApp('graph', accountId),
-      mail: await this.initOpenWebApp('mail', accountId)
+      // graph: await this.initOpenWebApp('graph', accountId),
+      mail: await this.initOpenWebApp('mail', accountId),
+      // keys: await this.initOpenWebApp('keys', accountId)
     };
     window.apps = apps;
     this.apps = apps;
@@ -137,8 +139,9 @@ export class Home extends Component {
     if (!await app.ready()) {
       let pk = await app.getAccessPublicKey();
       this.log("Authorizing app for key " + pk.toString() + " ...");
+      const serializedPk = await app.getSerializedAccessPublicKey();
       const args = {
-        public_key: [...nearlib.utils.serialize.serialize(nearlib.transactions.SCHEMA, pk)],
+        public_key: [...serializedPk],
         app_id: appId,
       };
       await this.masterContract.add_app_key(args, GAS);
@@ -185,33 +188,34 @@ export class Home extends Component {
           </div>
         </div>
       </div>
-    } else {
-      return <div>
-        {this.state.loading && (
-          <div className="loading-div">
-            <div className="spinner-grow loading-spinner" role="status">
-              <span className="sr-only">Loading...</span>
-            </div>
-            <pre className="text-left">
-            {this.state.logs.join("\n")}
-          </pre>
-          </div>
-        )}
-        <div className={"apps" + (this.state.loading ? " d-none" : "")}>
-          <Tabs forceRenderTabPanel={true}>
-            <TabList>
-              <Tab>Profile</Tab>
-              <Tab>Mail {this.state.unread ? `(${this.state.unread})` : ""}</Tab>
-            </TabList>
-
-            <TabPanel>
-              <ProfileApp app={this.state.apps.profile} logOut={this.requestSignOut}/>
-            </TabPanel>
-            <TabPanel>
-              <MailApp app={this.state.apps.mail} onNewMail={(unread) => this.setState({unread})}/>
-            </TabPanel>
-          </Tabs>
+    } else if (this.state.loading) {
+      return <div className="loading-div">
+        <div className="spinner-grow loading-spinner" role="status">
+          <span className="sr-only">Loading...</span>
         </div>
+        <pre className="text-left">
+          {this.state.logs.join("\n")}
+        </pre>
+      </div>
+    } else {
+      return <div className={"apps" + (this.state.loading ? " d-none" : "")}>
+        <Tabs forceRenderTabPanel={true}>
+          <TabList>
+            <Tab>Profile</Tab>
+            <Tab>Mail {this.state.unread ? `(${this.state.unread})` : ""}</Tab>
+            {/*<Tab>Keys</Tab>*/}
+          </TabList>
+
+          <TabPanel>
+            <ProfileApp app={this.state.apps.profile} logOut={this.requestSignOut}/>
+          </TabPanel>
+          <TabPanel>
+            <MailApp app={this.state.apps.mail} onNewMail={(unread) => this.setState({unread})}/>
+          </TabPanel>
+          {/*<TabPanel>
+            <KeysApp app={this.state.apps.keys}/>
+          </TabPanel>*/}
+        </Tabs>
       </div>
     }
   }

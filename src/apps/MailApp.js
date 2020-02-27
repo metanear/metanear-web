@@ -2,7 +2,6 @@ import React from "react";
 import anon from "../assets/anon.png";
 import encryptionOn from "../assets/encryptionOn.png";
 import encryptionOff from "../assets/encryptionOff.png";
-import { encryptionKey } from "near-openweb-js";
 import { Profile } from "react-near-openweb";
 
 const RE = "Re: ";
@@ -83,10 +82,14 @@ export class MailApp extends React.Component {
   }
 
   async init() {
-    this.setState({
-      initialized: true,
-    });
-    const version = await this.props.app.get('version', { encrypted: true }) || 0;
+    let version;
+    try {
+      version = await this.props.app.get('version', {encrypted: true}) || 0;
+    } catch (e) {
+      // likely mismatched keys
+      console.log(e);
+      return;
+    }
     if (version < currentVersion) {
       await this.migrateFrom(version);
     }
@@ -100,10 +103,22 @@ export class MailApp extends React.Component {
     this.fetchMessages();
   }
 
-  componentDidUpdate(prevProps) {
+  maybeInit() {
     if (this.props.app && !this.state.initialized) {
-      this.init();
+      this.setState({
+        initialized: true,
+      });
+      this.props.app.waitReady().then(() => this.init());
     }
+  }
+
+
+  componentDidMount() {
+    this.maybeInit()
+  }
+
+  componentDidUpdate(prevProps) {
+    this.maybeInit()
   }
 
   async fetchKey(accountId) {
@@ -111,7 +126,7 @@ export class MailApp extends React.Component {
       return await this.keyCache[accountId];
     } else {
       console.log("Fetching key for " + accountId);
-      this.keyCache[accountId] = this.props.app.getFrom(accountId, encryptionKey).catch((e) => false);
+      this.keyCache[accountId] = this.props.app.getStoredEncryptionPublicKey(accountId, {}).catch((e) => false);
       return await this.keyCache[accountId];
     }
   }

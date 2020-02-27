@@ -12,9 +12,9 @@
         "react-router-tabs": "^1.3.2",
         "react-scripts": "^3.4.0",
         "react-tabs": "3.1.0",
-        "react-near-openweb": "^0.1.1",
+        "react-near-openweb": "^0.1.3",
         "nearlib": "^0.21.0",
-        "near-openweb-js": "^0.1.0"
+        "near-openweb-js": "^0.2.0"
     },
     "scripts": {
         "start": "react-scripts start",
@@ -23,7 +23,8 @@
         "eject": "react-scripts eject",
         "deploy:pages": "gh-pages -d build",
         "deploy": "npm run deploy:pages",
-        "build": "react-scripts build"
+        "build": "react-scripts build",
+        "prepare": "yarn build"
     },
     "eslintConfig": {
         "extends": "react-app"
