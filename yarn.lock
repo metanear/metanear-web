@@ -2096,6 +2096,25 @@ bindings@^1.5.0:
   dependencies:
     file-uri-to-path "1.0.0"
 
+bip39-light@^1.0.7:
+  version "1.0.7"
+  resolved "https://registry.yarnpkg.com/bip39-light/-/bip39-light-1.0.7.tgz#06a72f251b89389a136d3f177f29b03342adc5ba"
+  integrity sha512-WDTmLRQUsiioBdTs9BmSEmkJza+8xfJmptsNJjxnoq3EydSa/ZBXT6rm66KoT3PJIRYMnhSKNR7S9YL1l7R40Q==
+  dependencies:
+    create-hash "^1.1.0"
+    pbkdf2 "^3.0.9"
+
+bip39@2.4.0:
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/bip39/-/bip39-2.4.0.tgz#a0b8adbf163f53495f00f05d9ede7c25369ccf13"
+  integrity sha512-1++HywqIyPtWDo7gm4v0ylYbwkLvHkuwVSKbBlZBbTCP/mnkyrlARBny906VLAwxJbC5xw9EvuJasHFIZaIFMQ==
+  dependencies:
+    create-hash "^1.1.0"
+    pbkdf2 "^3.0.9"
+    randombytes "^2.0.1"
+    safe-buffer "^5.0.1"
+    unorm "^1.3.3"
+
 bluebird@^3.5.5:
   version "3.7.2"
   resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.7.2.tgz#9f229c15be272454ffa973ace0dbee79a1b0c36f"
@@ -2269,7 +2288,7 @@ browserslist@^4.0.0, browserslist@^4.6.2, browserslist@^4.6.4, browserslist@^4.8
     electron-to-chromium "^1.3.349"
     node-releases "^1.1.49"
 
-bs58@^4.0.0:
+bs58@^4.0.0, bs58@^4.0.1:
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/bs58/-/bs58-4.0.1.tgz#be161e76c354f6f788ae4071f63f34e8c4f0a42a"
   integrity sha1-vhYedsNU9veIrkBx9j806MTwpCo=
@@ -2899,6 +2918,18 @@ create-hash@^1.1.0, create-hash@^1.1.2:
     md5.js "^1.3.4"
     ripemd160 "^2.0.1"
     sha.js "^2.4.0"
+
+create-hmac@1.1.6:
+  version "1.1.6"
+  resolved "https://registry.yarnpkg.com/create-hmac/-/create-hmac-1.1.6.tgz#acb9e221a4e17bdb076e90657c42b93e3726cf06"
+  integrity sha1-rLniIaThe9sHbpBlfEK5PjcmzwY=
+  dependencies:
+    cipher-base "^1.0.3"
+    create-hash "^1.1.0"
+    inherits "^2.0.1"
+    ripemd160 "^2.0.0"
+    safe-buffer "^5.0.1"
+    sha.js "^2.4.8"
 
 create-hmac@^1.1.0, create-hmac@^1.1.2, create-hmac@^1.1.4:
   version "1.1.7"
@@ -6640,6 +6671,15 @@ natural-compare@^1.4.0:
   resolved "https://registry.yarnpkg.com/natural-compare/-/natural-compare-1.4.0.tgz#4abebfeed7541f2c27acfb29bdbbd15c8d5ba4f7"
   integrity sha1-Sr6/7tdUHywnrPspvbvRXI1bpPc=
 
+near-hd-key@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/near-hd-key/-/near-hd-key-1.0.0.tgz#b18fbbc8d5348a29d226ec8d546ba089afc42ce8"
+  integrity sha512-NknsGxGM1YivNUKdlhYl1pPWtRGOg8uBSJHd0j4B8mk0MxAeumIcorazp4V888sJleu/GptfPcGNlfiEf0zXaw==
+  dependencies:
+    bip39 "2.4.0"
+    create-hmac "1.1.6"
+    tweetnacl "^1.0.1"
+
 near-openweb-js@^0.1.0:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/near-openweb-js/-/near-openweb-js-0.1.0.tgz#60128d1e0a6270731af77ed4af11b12bac4483d9"
@@ -6648,10 +6688,44 @@ near-openweb-js@^0.1.0:
     nearlib "^0.21.0"
     tweetnacl "^1.0.1"
 
+near-openweb-js@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/near-openweb-js/-/near-openweb-js-0.2.0.tgz#7ba3dbac23a08b2f5c7796a9d0e182020759c8d3"
+  integrity sha512-KQnIlIN+M/AtIPkkrQAKE7y700Bm1R+GYCpl8OfcSdSDrNtA0s5kaBe124e5FqxvwuDk0exbwZxeA06ilPpOmg==
+  dependencies:
+    nearlib "^0.21.0"
+    tweetnacl "^1.0.1"
+
+near-seed-phrase@^0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/near-seed-phrase/-/near-seed-phrase-0.0.2.tgz#1ac4c64b2188e5dc479b6fe3a0966776919d9b49"
+  integrity sha512-N+1+yxqQffcvFdmw8L4ktO5B7nCtmnY0KxptjkxP7XQyW+Zbfqi9arwYQDQZKMrG9xZaLErKjyTD42RXyOtB+g==
+  dependencies:
+    bip39-light "^1.0.7"
+    bs58 "^4.0.1"
+    near-hd-key "^1.0.0"
+    tweetnacl "^1.0.2"
+
 nearlib@^0.21.0:
   version "0.21.0"
   resolved "https://registry.yarnpkg.com/nearlib/-/nearlib-0.21.0.tgz#18e4edc2504fa1dfdb8a6a336ea2d0e20823bf06"
   integrity sha512-FSHWxmMjYSh/zQ1x7FfR/o47kUmMyhWQuB+efJmX0C2GdNWeGNDrTmSpwsYDSDejLBkt6ayr4Nk7TsvdjJcgsQ==
+  dependencies:
+    "@types/bn.js" "^4.11.5"
+    bn.js "^5.0.0"
+    bs58 "^4.0.0"
+    error-polyfill "^0.1.2"
+    http-errors "^1.7.2"
+    js-sha256 "^0.9.0"
+    mustache "^4.0.0"
+    node-fetch "^2.3.0"
+    text-encoding-utf-8 "^1.0.2"
+    tweetnacl "^1.0.1"
+
+nearlib@^0.22.0:
+  version "0.22.0"
+  resolved "https://registry.yarnpkg.com/nearlib/-/nearlib-0.22.0.tgz#e7e9ed88752fb533c0920720f962f97395ddfec6"
+  integrity sha512-6yTc5Ti5oHFak8GSvuzHF7gTRIXRDIs822LiIqJWqoJ5emWktAZqWowS9taAazfG/joU2H0B3WX5Z46oIv4U0w==
   dependencies:
     "@types/bn.js" "^4.11.5"
     bn.js "^5.0.0"
@@ -7303,7 +7377,7 @@ path-type@^4.0.0:
   resolved "https://registry.yarnpkg.com/path-type/-/path-type-4.0.0.tgz#84ed01c0a7ba380afe09d90a8c180dcd9d03043b"
   integrity sha512-gDKb8aZMDeD/tZWs9P6+q0J9Mwkdl6xMV8TjnGP3qJVJ06bdMgkbBlLU8IdfOsIsFz2BW1rNVT3XuNEl8zPAvw==
 
-pbkdf2@^3.0.3:
+pbkdf2@^3.0.3, pbkdf2@^3.0.9:
   version "3.0.17"
   resolved "https://registry.yarnpkg.com/pbkdf2/-/pbkdf2-3.0.17.tgz#976c206530617b14ebb32114239f7b09336e93a6"
   integrity sha512-U/il5MsrZp7mGg3mSQfn742na2T+1/vHDCG5/iTI3X9MKUuYUZVLQhyRsg06mCgDBTd57TxzgZt7P+fYfjRLtA==
@@ -8374,10 +8448,10 @@ react-is@^16.6.0, react-is@^16.7.0, react-is@^16.8.1, react-is@^16.8.4:
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.12.0.tgz#2cc0fe0fba742d97fd527c42a13bec4eeb06241c"
   integrity sha512-rPCkf/mWBtKc97aLL9/txD8DZdemK0vkA3JMLShjlJB3Pj3s+lpf1KaBzMfQrAmhMQB0n1cU/SUGgKKBCe837Q==
 
-react-near-openweb@^0.1.1:
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/react-near-openweb/-/react-near-openweb-0.1.1.tgz#397f925d2913a631b65bd49af3c9bff237223aec"
-  integrity sha512-aiPRZO6iZoct9B84OZKtAX+cj+4Z4GF6QGA4o+Grpcf9XnZzGzBZoYaDf8aCcyfBgywWnlUI+AI3Uf6nXRRx1Q==
+react-near-openweb@^0.1.3:
+  version "0.1.3"
+  resolved "https://registry.yarnpkg.com/react-near-openweb/-/react-near-openweb-0.1.3.tgz#410037436a9f6c6678034802b44b009d51479d55"
+  integrity sha512-3pin5Sj5YbMbasq8DkdtWYX8AHsdBczWzK3bmy3OIyjEM1a1+j3K8tuVoek8VhrTdDWbUe5o76aJPQOUl5SSnQ==
   dependencies:
     near-openweb-js "^0.1.0"
     prop-types "^15.7.2"
@@ -9920,7 +9994,7 @@ tweetnacl@^0.14.3, tweetnacl@~0.14.0:
   resolved "https://registry.yarnpkg.com/tweetnacl/-/tweetnacl-0.14.5.tgz#5ae68177f192d4456269d108afa93ff8743f4f64"
   integrity sha1-WuaBd/GS1EViadEIr6k/+HQ/T2Q=
 
-tweetnacl@^1.0.1:
+tweetnacl@^1.0.1, tweetnacl@^1.0.2:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/tweetnacl/-/tweetnacl-1.0.3.tgz#ac0af71680458d8a6378d0d0d050ab1407d35596"
   integrity sha512-6rt+RN7aOi1nGMyC4Xa5DdYiukl2UWCbcJft7YhxReBGQD7OAM8Pbxw6YMo4r2diNEA8FEmu32YOn9rhaiE5yw==
@@ -10026,6 +10100,11 @@ universalify@^0.1.0:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/universalify/-/universalify-0.1.2.tgz#b646f69be3942dabcecc9d6639c80dc105efaa66"
   integrity sha512-rBJeI5CXAlmy1pV+617WB9J63U6XcazHHF2f2dbJix4XzpUF0RS3Zbj0FGIOCAva5P/d/GBOYaACQ1w+0azUkg==
+
+unorm@^1.3.3:
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/unorm/-/unorm-1.6.0.tgz#029b289661fba714f1a9af439eb51d9b16c205af"
+  integrity sha512-b2/KCUlYZUeA7JFUuRJZPUtr4gZvBh7tavtv4fvk4+KV9pfGiR6CQAQAWl49ZpR3ts2dk4FYkP7EIgDJoiOLDA==
 
 unpipe@1.0.0, unpipe@~1.0.0:
   version "1.0.0"

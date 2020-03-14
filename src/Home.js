@@ -8,9 +8,11 @@ import { MailApp } from "./apps/MailApp";
 // import { KeysApp } from "./apps/KeysApp";
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
+import { PowFaucet, AuthDataKey}  from "./components/PowFaucet";
 
 const GAS = 2_000_000_000_000_000;
 const TITLE = "Open Web Home - NEAR"
+const DefaultTabIndexKey = "metanearDefaultTabIndex";
 
 export class Home extends Component {
   constructor(props) {
@@ -21,6 +23,7 @@ export class Home extends Component {
       logs: [],
       unread: 0,
       loading: false,
+      defaultTabIndex: JSON.parse(window.localStorage.getItem(DefaultTabIndexKey) || '0'),
     }
     this.signedInFlow = this.signedInFlow.bind(this);
     this.requestSignIn = this.requestSignIn.bind(this);
@@ -37,8 +40,9 @@ export class Home extends Component {
 
   async checkSignIn() {
     let loggedIn = window.walletAccount.isSignedIn();
-    if (loggedIn) {
-      await this.signedInFlow();
+    let authData = JSON.parse(window.localStorage.getItem(AuthDataKey) || '{}');
+    if (loggedIn || authData.accountId) {
+      await this.signedInFlow(authData);
     } else {
       this.signedOutFlow();
     }
@@ -51,8 +55,8 @@ export class Home extends Component {
     })
   }
 
-  async signedInFlow() {
-    const accountId = await this.props.wallet.getAccountId()
+  async signedInFlow(authData) {
+    const accountId = authData.accountId || await this.props.wallet.getAccountId();
     this.setState({
       login: true,
       loading: true,
@@ -174,6 +178,13 @@ export class Home extends Component {
     })
   }
 
+  selectTab = (index) => {
+    window.localStorage.setItem(DefaultTabIndexKey, JSON.stringify(index));
+    this.setState({
+      defaultTabIndex: index,
+    })
+  }
+
   render() {
     document.title = (this.state.unread ? `(${this.state.unread}) ` : "") + TITLE;
     if (!this.state.login) {
@@ -184,8 +195,11 @@ export class Home extends Component {
           </div>
           <h1>Hello ?</h1>
           <div>
-            <button onClick={this.requestSignIn}>Log in with NEAR</button>
+            <button
+                className="btn btn-primary"
+                onClick={this.requestSignIn}>Log in with NEAR Wallet</button>
           </div>
+          <PowFaucet onLogin={this.signedInFlow}/>
         </div>
       </div>
     } else if (this.state.loading) {
@@ -199,7 +213,7 @@ export class Home extends Component {
       </div>
     } else {
       return <div className={"apps" + (this.state.loading ? " d-none" : "")}>
-        <Tabs forceRenderTabPanel={true}>
+        <Tabs forceRenderTabPanel={true} defaultIndex={this.state.defaultTabIndex} onSelect={(i) => this.selectTab(i)}>
           <TabList>
             <Tab>Profile</Tab>
             <Tab>Mail {this.state.unread ? `(${this.state.unread})` : ""}</Tab>

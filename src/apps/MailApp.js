@@ -259,7 +259,7 @@ export class MailApp extends React.Component {
       this.setState({
         sending: false,
       });
-      this.fetchMessages();
+      setTimeout(() => this.fetchMessages(), 2000);
     };
   }
 
