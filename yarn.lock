@@ -6680,20 +6680,12 @@ near-hd-key@^1.0.0:
     create-hmac "1.1.6"
     tweetnacl "^1.0.1"
 
-near-openweb-js@^0.1.0:
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/near-openweb-js/-/near-openweb-js-0.1.0.tgz#60128d1e0a6270731af77ed4af11b12bac4483d9"
-  integrity sha512-ypDQHwh8ZfoijTng6m+ri7XjEXsIDaBH5t278bGglhGFYInW4POwSa0PRRoIAUHGGPa4DYsOPhxoxdzmUJT8kg==
+near-openweb-js@^0.2.1:
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/near-openweb-js/-/near-openweb-js-0.2.1.tgz#fb7a6d9643dcfffec250b95523624b1cde893f74"
+  integrity sha512-MtUKiuSMI/QYMV9ebDBE4vbiKnupo5L8Hj64eXQELO8CTMF7Si30WzoR7fpTDhX6Xf0M5EZxN7Waq6D3xpqJZg==
   dependencies:
-    nearlib "^0.21.0"
-    tweetnacl "^1.0.1"
-
-near-openweb-js@^0.2.0:
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/near-openweb-js/-/near-openweb-js-0.2.0.tgz#7ba3dbac23a08b2f5c7796a9d0e182020759c8d3"
-  integrity sha512-KQnIlIN+M/AtIPkkrQAKE7y700Bm1R+GYCpl8OfcSdSDrNtA0s5kaBe124e5FqxvwuDk0exbwZxeA06ilPpOmg==
-  dependencies:
-    nearlib "^0.21.0"
+    nearlib "^0.22.0"
     tweetnacl "^1.0.1"
 
 near-seed-phrase@^0.0.2:
@@ -6705,22 +6697,6 @@ near-seed-phrase@^0.0.2:
     bs58 "^4.0.1"
     near-hd-key "^1.0.0"
     tweetnacl "^1.0.2"
-
-nearlib@^0.21.0:
-  version "0.21.0"
-  resolved "https://registry.yarnpkg.com/nearlib/-/nearlib-0.21.0.tgz#18e4edc2504fa1dfdb8a6a336ea2d0e20823bf06"
-  integrity sha512-FSHWxmMjYSh/zQ1x7FfR/o47kUmMyhWQuB+efJmX0C2GdNWeGNDrTmSpwsYDSDejLBkt6ayr4Nk7TsvdjJcgsQ==
-  dependencies:
-    "@types/bn.js" "^4.11.5"
-    bn.js "^5.0.0"
-    bs58 "^4.0.0"
-    error-polyfill "^0.1.2"
-    http-errors "^1.7.2"
-    js-sha256 "^0.9.0"
-    mustache "^4.0.0"
-    node-fetch "^2.3.0"
-    text-encoding-utf-8 "^1.0.2"
-    tweetnacl "^1.0.1"
 
 nearlib@^0.22.0:
   version "0.22.0"
@@ -8448,12 +8424,12 @@ react-is@^16.6.0, react-is@^16.7.0, react-is@^16.8.1, react-is@^16.8.4:
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.12.0.tgz#2cc0fe0fba742d97fd527c42a13bec4eeb06241c"
   integrity sha512-rPCkf/mWBtKc97aLL9/txD8DZdemK0vkA3JMLShjlJB3Pj3s+lpf1KaBzMfQrAmhMQB0n1cU/SUGgKKBCe837Q==
 
-react-near-openweb@^0.1.3:
-  version "0.1.3"
-  resolved "https://registry.yarnpkg.com/react-near-openweb/-/react-near-openweb-0.1.3.tgz#410037436a9f6c6678034802b44b009d51479d55"
-  integrity sha512-3pin5Sj5YbMbasq8DkdtWYX8AHsdBczWzK3bmy3OIyjEM1a1+j3K8tuVoek8VhrTdDWbUe5o76aJPQOUl5SSnQ==
+react-near-openweb@^0.1.4:
+  version "0.1.4"
+  resolved "https://registry.yarnpkg.com/react-near-openweb/-/react-near-openweb-0.1.4.tgz#d79d07839cefa1a33aef56630f5d1f7d57b0a67b"
+  integrity sha512-403FYrNI7JMwczevLsDCOE7gJAEFPJf26vCJZITAn+Y7W8RvZ2Tn14Fx2VbBmap1OrJm5O61M46ob5lGJxokRA==
   dependencies:
-    near-openweb-js "^0.1.0"
+    near-openweb-js "^0.2.1"
     prop-types "^15.7.2"
 
 react-router-dom@^5.1.2:

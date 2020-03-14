@@ -121,7 +121,8 @@ export class ProfileApp extends React.Component {
       // Convert the canvas to a data URL in PNG format
       const options = [
         canvas.toDataURL('image/jpeg', 0.92),
-        canvas.toDataURL('image/webp', 0.92),
+        // Disabling webp because it doesn't work on iOS.
+        // canvas.toDataURL('image/webp', 0.92),
         canvas.toDataURL('image/png')
       ];
       options.sort((a, b) => a.length - b.length);
