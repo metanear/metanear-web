@@ -21,7 +21,7 @@
         "build:frontend": "react-scripts build",
         "test": "react-scripts test",
         "eject": "react-scripts eject",
-        "deploy:pages": "gh-pages -d build",
+        "deploy:pages": "yarn build && gh-pages -d build",
         "deploy": "npm run deploy:pages",
         "build": "react-scripts build",
         "prepare": "yarn build"
