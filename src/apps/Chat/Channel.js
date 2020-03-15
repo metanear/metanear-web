@@ -21,6 +21,7 @@ export class Channel extends React.Component {
         this.fetchingMessages = false;
         this.fetchTimeoutId = null;
         this.channelInnerRef = React.createRef();
+        this.mounted = false;
     }
 
     async loadCache(channelId) {
@@ -40,12 +41,19 @@ export class Channel extends React.Component {
         this.updateState(true);
     }
 
+    scrollDown() {
+        this.channelInnerRef.current.scrollTop = this.channelInnerRef.current.scrollHeight;
+    }
+
     updateState(scrollDown) {
+        if (!this.mounted) {
+            return;
+        }
         this.setState({
             messages: Object.values(this.cachedMessages)
         }, () => {
-            if (scrollDown) {
-                this.channelInnerRef.current.scrollTop = this.channelInnerRef.current.scrollHeight;
+            if (scrollDown)  {
+                this.scrollDown();
             }
         })
     }
@@ -62,26 +70,37 @@ export class Channel extends React.Component {
         if (this.props.app && !this.state.initialized) {
             this.setState({
                 initialized: true,
+                appReady: true,
             });
-            this.props.app.waitReady().then(() => {
-                this.setState({
-                    appReady: true,
-                });
-                this.fetchNewMessages();
-            });
+            this.fetchNewMessages();
         }
     }
 
     componentDidMount() {
         this.maybeInit()
+        this.mounted = true;
     }
 
     componentDidUpdate(prevProps) {
         this.maybeInit()
+        if (this.props.currentMessage) {
+            setTimeout(() => {
+                this.scrollDown();
+            }, 10);
+        }
         if (!this.props.currentMessage && prevProps.currentMessage) {
             this.fetchNewMessages();
         }
     }
+
+    componentWillUnmount() {
+        this.mounted = false;
+        if (this.fetchTimeoutId) {
+            clearTimeout(this.fetchTimeoutId);
+            this.fetchTimeoutId = null;
+        }
+    }
+
 
     addNewMessage(channelId, message) {
         if (channelId !== this.channelId) {
@@ -154,12 +173,14 @@ export class Channel extends React.Component {
             let lastNumMessages = this.cachedRanges.length ? this.cachedRanges[this.cachedRanges.length - 1].last : 0;
             if (lastNumMessages < numChannelMessages) {
                 await this.fetchMessages(channel, lastNumMessages, numChannelMessages);
-                this.updateState();
+                this.updateState(true);
             }
         }
         finally {
             this.fetchingMessages = false;
-            this.fetchTimeoutId = setTimeout(() => this.fetchNewMessages(), 2000);
+            if (this.mounted) {
+                this.fetchTimeoutId = setTimeout(() => this.fetchNewMessages(), 2000);
+            }
         }
     }
 

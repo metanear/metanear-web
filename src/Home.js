@@ -10,6 +10,7 @@ import { MailApp } from "./apps/MailApp";
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
 import { PowFaucet, AuthDataKey}  from "./components/PowFaucet";
+import {Channel} from "./apps/Chat/Channel";
 
 const GAS = 2_000_000_000_000_000;
 const TITLE = "Meta NEAR - User-centric web"
@@ -26,6 +27,7 @@ export class Home extends Component {
       chatUnread: 0,
       loading: false,
       defaultTabIndex: JSON.parse(window.localStorage.getItem(DefaultTabIndexKey) || '0'),
+      offlineChatApp: null,
     }
     this.signedInFlow = this.signedInFlow.bind(this);
     this.requestSignIn = this.requestSignIn.bind(this);
@@ -164,20 +166,27 @@ export class Home extends Component {
     )
   }
 
-  requestSignOut = () => {
+  requestSignOut() {
     this.props.wallet.signOut();
     setTimeout(this.signedOutFlow, 500);
     console.log("after sign out", this.props.wallet.isSignedIn())
   }
 
 
-  signedOutFlow = () => {
+  async signedOutFlow() {
     if (window.location.search.includes("account_id")) {
       window.location.replace(window.location.origin + window.location.pathname)
     }
     this.setState({
       login: false,
     })
+    if (!this.state.offlineChatApp) {
+      const app = new OpenWebApp("chat", null, window.nearConfig);
+      await app.init();
+      this.setState({
+        offlineChatApp: app,
+      })
+    }
   }
 
   selectTab = (index) => {
@@ -196,13 +205,17 @@ export class Home extends Component {
           <div className="image-wrapper">
             <img className="logo" src={nearlogo} alt="NEAR logo"/>
           </div>
-          <h1>Hello ?</h1>
           <div>
             <button
                 className="btn btn-primary"
                 onClick={this.requestSignIn}>Log in with NEAR Wallet</button>
           </div>
           <PowFaucet onLogin={this.signedInFlow}/>
+          <hr/>
+          <div>
+            <h3>To join #public chat </h3>
+            <Channel channelId="public" app={this.state.offlineChatApp}/>
+          </div>
         </div>
       </div>
     } else if (this.state.loading) {

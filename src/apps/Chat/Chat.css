@@ -3,7 +3,9 @@
     padding: 0 0.5em;
     overflow-y: auto;
     overflow-x: hidden;
-    height: 10em;
+    height: 20em;
+    background: #fff;
+    text-align: left;
 }
 
 .chat-message {
