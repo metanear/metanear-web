@@ -4,6 +4,7 @@ import './css/App.css';
 import * as nearlib from "nearlib";
 import { OpenWebApp } from 'near-openweb-js';
 import { ProfileApp } from "./apps/ProfileApp";
+import { ChatApp } from "./apps/Chat/ChatApp";
 import { MailApp } from "./apps/MailApp";
 // import { KeysApp } from "./apps/KeysApp";
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
@@ -11,7 +12,7 @@ import 'react-tabs/style/react-tabs.css';
 import { PowFaucet, AuthDataKey}  from "./components/PowFaucet";
 
 const GAS = 2_000_000_000_000_000;
-const TITLE = "Open Web Home - NEAR"
+const TITLE = "Meta NEAR - User-centric web"
 const DefaultTabIndexKey = "metanearDefaultTabIndex";
 
 export class Home extends Component {
@@ -21,7 +22,8 @@ export class Home extends Component {
       login: false,
       apps: {},
       logs: [],
-      unread: 0,
+      mailUnread: 0,
+      chatUnread: 0,
       loading: false,
       defaultTabIndex: JSON.parse(window.localStorage.getItem(DefaultTabIndexKey) || '0'),
     }
@@ -124,7 +126,7 @@ export class Home extends Component {
     this.log("Initializing local apps...");
     const apps = {
       profile: await this.initOpenWebApp('profile', accountId),
-      // graph: await this.initOpenWebApp('graph', accountId),
+      chat: await this.initOpenWebApp('chat', accountId),
       mail: await this.initOpenWebApp('mail', accountId),
       // keys: await this.initOpenWebApp('keys', accountId)
     };
@@ -186,7 +188,8 @@ export class Home extends Component {
   }
 
   render() {
-    document.title = (this.state.unread ? `(${this.state.unread}) ` : "") + TITLE;
+    const unread = this.state.mailUnread + this.state.chatUnread;
+    document.title = (unread ? `(${unread}) ` : "") + TITLE;
     if (!this.state.login) {
       return <div className="App-header">
         <div>
@@ -212,19 +215,23 @@ export class Home extends Component {
         </pre>
       </div>
     } else {
-      return <div className={"apps" + (this.state.loading ? " d-none" : "")}>
-        <Tabs forceRenderTabPanel={true} defaultIndex={this.state.defaultTabIndex} onSelect={(i) => this.selectTab(i)}>
+      return <div className={"h100 apps" + (this.state.loading ? " d-none" : "")}>
+        <Tabs className="h100 cflex" forceRenderTabPanel={true} defaultIndex={this.state.defaultTabIndex} onSelect={(i) => this.selectTab(i)}>
           <TabList>
             <Tab>Profile</Tab>
-            <Tab>Mail {this.state.unread ? `(${this.state.unread})` : ""}</Tab>
+            <Tab>Public Chat {this.state.chatUnread ? `(${this.state.chatUnread})` : ""}</Tab>
+            <Tab>Mail {this.state.mailUnread ? `(${this.state.mailUnread})` : ""}</Tab>
             {/*<Tab>Keys</Tab>*/}
           </TabList>
 
           <TabPanel>
             <ProfileApp app={this.state.apps.profile} logOut={this.requestSignOut}/>
           </TabPanel>
+          <TabPanel style={{flexGrow: '1'}}>
+            <ChatApp app={this.state.apps.chat} onUnread={(chatUnread) => this.setState({chatUnread})}/>
+          </TabPanel>
           <TabPanel>
-            <MailApp app={this.state.apps.mail} onNewMail={(unread) => this.setState({unread})}/>
+            <MailApp app={this.state.apps.mail} onUnread={(mailUnread) => this.setState({mailUnread})}/>
           </TabPanel>
           {/*<TabPanel>
             <KeysApp app={this.state.apps.keys}/>

@@ -1,0 +1,63 @@
+.channel {
+    border: 1px solid #ddd;
+    padding: 0 0.5em;
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: 10em;
+}
+
+.chat-message {
+    margin-top: 0.5em;
+    clear: both;
+}
+
+.chat-message-no-meta {
+    margin-top: 0.0em;
+}
+
+.chat-message-pending {
+    background: #ffe;
+}
+
+.chat-message-profile {
+    height: 3em;
+    width: 3em;
+    border-radius: 50%;
+    vertical-align: top;
+    float: left;
+    margin-right: 0.5em;
+}
+
+.chat-message-no-meta .chat-message-profile,
+.chat-message-no-meta .chat-message-meta {
+    display: none;
+}
+
+.chat-message-sender-name {
+    display: inline-block;
+    font-weight: bold;
+}
+
+.chat-message-sender-id {
+    display: inline-block;
+    color: #999;
+}
+
+.chat-message-time {
+    display: inline-block;
+    margin-left: 1.5em;
+    color: #ddd;
+}
+
+.chat-message-content {
+    min-height: 3em;
+    margin-left: 3.5em;
+}
+
+.chat-message-no-meta .chat-message-content {
+    min-height: 1.5em;
+}
+
+.chat-message:hover {
+    background: #f7f7f7;
+}

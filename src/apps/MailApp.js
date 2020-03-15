@@ -46,7 +46,7 @@ export class MailApp extends React.Component {
       inbox,
       unread,
     });
-    this.props.onNewMail(unread);
+    this.props.onUnread(unread);
   }
 
   async migrateFrom(version) {
