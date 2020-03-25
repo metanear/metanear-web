@@ -1,7 +1,10 @@
 {
     "name": "metanear-web",
     "version": "0.1.0",
+    "license": "MIT",
     "private": true,
+    "repository": "metanear/metanear-web",
+    "homepage": "https://metanear.com",
     "dependencies": {
         "gh-pages": "^2.2.0",
         "js-cookie": "^2.2.1",
