@@ -1,6 +1,6 @@
 import React from "react";
 import anon from "../../assets/anon.png";
-import {Profile} from "react-near-openweb";
+import {Profile} from "metanear-react-components";
 
 const ProfileMessageStyle = {
     profile: {

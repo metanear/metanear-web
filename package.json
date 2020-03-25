@@ -1,5 +1,5 @@
 {
-    "name": "near-open-web-frontend",
+    "name": "metanear-web",
     "version": "0.1.0",
     "private": true,
     "dependencies": {
@@ -13,9 +13,9 @@
         "react-scripts": "^3.4.0",
         "near-seed-phrase": "^0.0.2",
         "react-tabs": "3.1.0",
-        "react-near-openweb": "^0.1.4",
         "nearlib": "^0.22.0",
-        "near-openweb-js": "^0.2.1"
+        "metanear-react-components": "^0.2.0",
+        "metanear-sdk-js": "^0.3.1"
     },
     "scripts": {
         "start": "react-scripts start",

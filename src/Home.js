@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import nearlogo from './assets/gray_near_logo.svg';
 import './css/App.css';
 import * as nearlib from "nearlib";
-import { OpenWebApp } from 'near-openweb-js';
+import { MetaNearApp } from 'metanear-sdk-js';
 import { ProfileApp } from "./apps/ProfileApp";
 import { ChatApp } from "./apps/Chat/ChatApp";
 import { MailApp } from "./apps/MailApp";
@@ -12,7 +12,7 @@ import 'react-tabs/style/react-tabs.css';
 import { PowFaucet, AuthDataKey}  from "./components/PowFaucet";
 import {Channel} from "./apps/Chat/Channel";
 
-const GAS = 2_000_000_000_000_000;
+const GAS = 200_000_000_000_000;
 const TITLE = "Meta NEAR - User-centric web"
 const DefaultTabIndexKey = "metanearDefaultTabIndex";
 
@@ -34,7 +34,7 @@ export class Home extends Component {
     this.requestSignOut = this.requestSignOut.bind(this);
     this.signedOutFlow = this.signedOutFlow.bind(this);
     this.checkSignIn = this.checkSignIn.bind(this);
-    this.initOpenWebApp = this.initOpenWebApp.bind(this);
+    this.initMetaNearApp = this.initMetaNearApp.bind(this);
     window.nearlib = nearlib;
   }
 
@@ -123,14 +123,12 @@ export class Home extends Component {
     this.log("Fetching authorized apps...");
     console.log("Apps:", await masterContract.apps());
 
-    // this.initOpenWebApp = this.initOpenWebApp.bind(this);
-
     this.log("Initializing local apps...");
     const apps = {
-      profile: await this.initOpenWebApp('profile', accountId),
-      chat: await this.initOpenWebApp('chat', accountId),
-      mail: await this.initOpenWebApp('mail', accountId),
-      // keys: await this.initOpenWebApp('keys', accountId)
+      profile: await this.initMetaNearApp('profile', accountId),
+      chat: await this.initMetaNearApp('chat', accountId),
+      mail: await this.initMetaNearApp('mail', accountId),
+      // keys: await this.initMetaNearApp('keys', accountId)
     };
     window.apps = apps;
     this.apps = apps;
@@ -140,9 +138,9 @@ export class Home extends Component {
     })
   }
 
-  async initOpenWebApp(appId, accountId) {
+  async initMetaNearApp(appId, accountId) {
     this.log("Initializing app: " + appId + " ...");
-    const app = new OpenWebApp(appId, accountId, window.nearConfig);
+    const app = new MetaNearApp(appId, accountId, window.nearConfig);
     await app.init();
     if (!await app.ready()) {
       let pk = await app.getAccessPublicKey();
@@ -181,7 +179,7 @@ export class Home extends Component {
       login: false,
     })
     if (!this.state.offlineChatApp) {
-      const app = new OpenWebApp("chat", null, window.nearConfig);
+      const app = new MetaNearApp("chat", null, window.nearConfig);
       await app.init();
       this.setState({
         offlineChatApp: app,

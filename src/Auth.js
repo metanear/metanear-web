@@ -23,7 +23,7 @@ export class Auth extends React.Component {
 
  componentDidMount() {
     if (!this.props.loading && this.state.new_app_id && this.state.new_pub_key) {
-      this.props.initOpenWebApp(this.state.new_app_id, this.state.new_pub_key)
+      this.props.initMetaNearApp(this.state.new_app_id, this.state.new_pub_key)
         .then(res => {
           this.setState({
             authorized: true
@@ -37,7 +37,7 @@ export class Auth extends React.Component {
       // this.init();
     }
   }
-  
+
   // async fetchProfile(accountId) {
   //   if (accountId in this.profileCache) {
   //     return this.profileCache[accountId];
@@ -83,7 +83,7 @@ export class Auth extends React.Component {
   render() {
     return (
       <div>
-        {this.state.authorized ? 
+        {this.state.authorized ?
         <div>
           <p>App <strong>{this.state.new_app_id}</strong> was added</p>
           <p> Using the public key: {this.state.new_pub_key} </p>

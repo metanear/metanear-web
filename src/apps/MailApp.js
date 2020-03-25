@@ -2,7 +2,7 @@ import React from "react";
 import anon from "../assets/anon.png";
 import encryptionOn from "../assets/encryptionOn.png";
 import encryptionOff from "../assets/encryptionOff.png";
-import { Profile } from "react-near-openweb";
+import { Profile } from "metanear-react-components";
 
 const RE = "Re: ";
 const currentVersion = 2;

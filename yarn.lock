@@ -6417,6 +6417,22 @@ merge2@^1.2.3:
   resolved "https://registry.yarnpkg.com/merge2/-/merge2-1.3.0.tgz#5b366ee83b2f1582c48f87e47cf1a9352103ca81"
   integrity sha512-2j4DAdlBOkiSZIsaXk4mTE3sRS02yBHAtfy127xRV3bQUFqXkjHCHLW6Scv7DwNRbIWNHH8zpnz9zMaKXIdvYw==
 
+metanear-react-components@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/metanear-react-components/-/metanear-react-components-0.2.0.tgz#a139140387e11e7d396b9c3f072f62a762ad0207"
+  integrity sha512-EsPmn2+pI1g7FMo+HkxZr4Jlgsi10lknEPn+0/T/NrT+HPYxCdCsLg34HziXwb+13Y7D29EpJmgI6cPOL7S4Vg==
+  dependencies:
+    metanear-sdk-js "^0.3.1"
+    prop-types "^15.7.2"
+
+metanear-sdk-js@^0.3.1:
+  version "0.3.1"
+  resolved "https://registry.yarnpkg.com/metanear-sdk-js/-/metanear-sdk-js-0.3.1.tgz#889a0bb3aa7e12bc384636d8db46ec797dcd2b8f"
+  integrity sha512-lRP2E7uIADM1I9PwMxFwod6teFF8l9T/iWN6VWR16aZ+3mYgAJTzHy44A71DLo/uiKJvLZfjcWDo/AS4wBfAdA==
+  dependencies:
+    nearlib "^0.22.0"
+    tweetnacl "^1.0.1"
+
 methods@~1.1.2:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/methods/-/methods-1.1.2.tgz#5529a4d67654134edcc5266656835b0f851afcee"
@@ -6678,14 +6694,6 @@ near-hd-key@^1.0.0:
   dependencies:
     bip39 "2.4.0"
     create-hmac "1.1.6"
-    tweetnacl "^1.0.1"
-
-near-openweb-js@^0.2.1:
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/near-openweb-js/-/near-openweb-js-0.2.1.tgz#fb7a6d9643dcfffec250b95523624b1cde893f74"
-  integrity sha512-MtUKiuSMI/QYMV9ebDBE4vbiKnupo5L8Hj64eXQELO8CTMF7Si30WzoR7fpTDhX6Xf0M5EZxN7Waq6D3xpqJZg==
-  dependencies:
-    nearlib "^0.22.0"
     tweetnacl "^1.0.1"
 
 near-seed-phrase@^0.0.2:
@@ -8423,14 +8431,6 @@ react-is@^16.6.0, react-is@^16.7.0, react-is@^16.8.1, react-is@^16.8.4:
   version "16.12.0"
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.12.0.tgz#2cc0fe0fba742d97fd527c42a13bec4eeb06241c"
   integrity sha512-rPCkf/mWBtKc97aLL9/txD8DZdemK0vkA3JMLShjlJB3Pj3s+lpf1KaBzMfQrAmhMQB0n1cU/SUGgKKBCe837Q==
-
-react-near-openweb@^0.1.4:
-  version "0.1.4"
-  resolved "https://registry.yarnpkg.com/react-near-openweb/-/react-near-openweb-0.1.4.tgz#d79d07839cefa1a33aef56630f5d1f7d57b0a67b"
-  integrity sha512-403FYrNI7JMwczevLsDCOE7gJAEFPJf26vCJZITAn+Y7W8RvZ2Tn14Fx2VbBmap1OrJm5O61M46ob5lGJxokRA==
-  dependencies:
-    near-openweb-js "^0.2.1"
-    prop-types "^15.7.2"
 
 react-router-dom@^5.1.2:
   version "5.1.2"

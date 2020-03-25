@@ -1,7 +1,7 @@
 import React from "react";
 import anon from "../assets/anon.png";
 import Files from "react-files";
-import { Profile } from "react-near-openweb";
+import { Profile } from "metanear-react-components";
 
 const uploadResizeWidth = 96;
 const uploadResizeHeight = 96;
