@@ -86,11 +86,11 @@ export class Home extends Component {
     })
      */
     console.log(state);
-    if (state.code_hash !== 'C8UmYSqATkuyhheJ7i7ryxPjfZL4nV8PfkovdMKitsmJ') {
+    if (state.code_hash !== 'F6iocDrCDzBCxUN9PKPeVp7GqDuPve4g3ypHQQrmEw5E') {
       this.log("Going to deploy the code");
       // no code. Need to deploy.
       this.log("Downloading started...");
-      let data = await fetch('/open_web.wasm');
+      let data = await fetch('/metanear_user.wasm');
       let buf = await data.arrayBuffer();
       this.log("Downloading done. Deploying contract...");
       await account.deployContract(new Uint8Array(buf));
