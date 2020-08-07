@@ -3325,6 +3325,11 @@ delayed-stream@~1.0.0:
   resolved "https://registry.yarnpkg.com/delayed-stream/-/delayed-stream-1.0.0.tgz#df3ae199acadfb7d440aaae0b29e2272b24ec619"
   integrity sha1-3zrhmayt+31ECqrgsp4icrJOxhk=
 
+depd@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/depd/-/depd-2.0.0.tgz#b696163cc757560d09cf22cc8fad1571b79e76df"
+  integrity sha512-g7nH6P6dyDioJogAAGprGpCtVImJhpPk/roCzdb3fIh61/s/nPsfR6onyMwkCAR/OlC3yBC0lESvUoQEAssIrw==
+
 depd@~1.1.2:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/depd/-/depd-1.1.2.tgz#9bcd52e14c097763e749b274c4346ed2e560b5a9"
@@ -6433,6 +6438,14 @@ metanear-sdk-js@^0.3.1:
     nearlib "^0.22.0"
     tweetnacl "^1.0.1"
 
+metanear-sdk-js@^0.3.3:
+  version "0.3.3"
+  resolved "https://registry.yarnpkg.com/metanear-sdk-js/-/metanear-sdk-js-0.3.3.tgz#5aeccb1df3eb529b80548a76e1a8028c0a9d017e"
+  integrity sha512-SZyWfOGn0uSI7oT76G9nctSgTct/5UgvN+shSkfl90srnaQYySHKfpxpykM0vkGjxz2cL4vlAYhFPBpRm5eGJA==
+  dependencies:
+    near-api-js "^0.29.0"
+    tweetnacl "^1.0.1"
+
 methods@~1.1.2:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/methods/-/methods-1.1.2.tgz#5529a4d67654134edcc5266656835b0f851afcee"
@@ -6686,6 +6699,23 @@ natural-compare@^1.4.0:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/natural-compare/-/natural-compare-1.4.0.tgz#4abebfeed7541f2c27acfb29bdbbd15c8d5ba4f7"
   integrity sha1-Sr6/7tdUHywnrPspvbvRXI1bpPc=
+
+near-api-js@^0.29.0:
+  version "0.29.0"
+  resolved "https://registry.yarnpkg.com/near-api-js/-/near-api-js-0.29.0.tgz#8bbd0c28b5b44e5042681fb02f09e2baf88f4f90"
+  integrity sha512-L0JZ6ClqiGOP0PYX8zLlugZTvc0m542q3FlZbaSnElkL60JyKkM5l598tPV6C9imheHsTi/aKE456DorgYVFbA==
+  dependencies:
+    "@types/bn.js" "^4.11.5"
+    bn.js "^5.0.0"
+    bs58 "^4.0.0"
+    depd "^2.0.0"
+    error-polyfill "^0.1.2"
+    http-errors "^1.7.2"
+    js-sha256 "^0.9.0"
+    mustache "^4.0.0"
+    node-fetch "^2.3.0"
+    text-encoding-utf-8 "^1.0.2"
+    tweetnacl "^1.0.1"
 
 near-hd-key@^1.0.0:
   version "1.0.0"

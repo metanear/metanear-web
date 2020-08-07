@@ -1,14 +1,14 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Router from './Router';
-import * as nearlib from 'nearlib';
+import * as nearlib from 'near-api-js';
 
 // Initializing contract
 async function InitContract() {
     window.nearConfig = {
         networkId: 'default',
-        nodeUrl: 'https://rpc.nearprotocol.com',
-        walletUrl: 'https://wallet.nearprotocol.com',
+        nodeUrl: 'https://rpc.testnet.near.org',
+        walletUrl: 'https://wallet.testnet.near.org',
     };
 
     // Initializing connection to the NEAR DevNet.

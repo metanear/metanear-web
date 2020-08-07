@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import nearlogo from './assets/gray_near_logo.svg';
 import './css/App.css';
-import * as nearlib from "nearlib";
+import * as nearlib from "near-api-js";
 import { MetaNearApp } from 'metanear-sdk-js';
 import { ProfileApp } from "./apps/ProfileApp";
 import { ChatApp } from "./apps/Chat/ChatApp";

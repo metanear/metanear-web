@@ -1,5 +1,5 @@
 import React from 'react';
-import * as nearlib from 'nearlib';
+import * as nearlib from 'near-api-js';
 import { generateSeedPhrase } from 'near-seed-phrase';
 
 const FaucetPrivateKey = 'ed25519:2Rtn6ms22rCRMgmGgLRSPPd6gYDCgWDuFrX6gERknSA8GKiCHE5L9Rksc1ihsSCDvMSptfbipzq29H7cDZhR1Ze3';
